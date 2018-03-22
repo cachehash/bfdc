@@ -111,7 +111,6 @@ void interp() {
 	for (int z = 0; z < numCells; z++) {
 		m[z] = 0;
 	}
-	free(imem);
 	imem = malloc(0);
 	pc = 0;
 	size_t *isz = 0;
@@ -119,4 +118,6 @@ void interp() {
 	size_t end = pc;
 	pc = 0;
 	interpret(end, m);
+	free(imem);
+	imem = NULL;
 }
