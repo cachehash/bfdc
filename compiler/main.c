@@ -94,7 +94,9 @@ int main(int argc, char** argv) {
 	if ((outname && interpret) || (cell_t_str && interpret)) {
 		usage(INVALID_COMBINATION);
 	}
-	cell_t_str = strdup("uint8_t");
+	if (cell_t_str == NULL) {
+		cell_t_str = strdup("uint8_t");
+	}
 	if (ifile == NULL) {
 		usage(NO_INPUT);
 	}
