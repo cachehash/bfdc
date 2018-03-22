@@ -20,6 +20,16 @@
 #define NUM_CELLS 30000
 #endif
 
+#define EOF_M1 0
+#define EOF_0 1
+#define EOF_NC 2
+
+#define READ_CHAR_FMT \
+"CELL_T readChar(int prev) {\n\t"\
+	"int x = getchar();\n\t"\
+	"return (x == EOF) ? %s : x;\n}"
+
+#define EOF_0_STR READ_CHAR_HEAD 
 typedef struct Point {
 	int x;
 	int y;
@@ -41,5 +51,9 @@ extern int numCells;
 extern Node* mkNode(int,int);
 extern Node* root;
 extern FILE* outfile;
+CELL_T readChar();
+
+extern char* eofStr;
+extern int eofType;
 
 #endif

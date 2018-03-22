@@ -47,7 +47,7 @@ void compile(Node* n) {
 		iprintf("fflush(stdout);");
 	break;
 	case IN:
-		iprintf("m[i] = getchar();");
+		iprintf("m[i] = readChar(m[i]);");
 	break;
 	case SET: {
 		for (int i = 0; i < n->sz; i++) {
@@ -90,6 +90,7 @@ void comp() {
 	iprintf("#define NUM_CELLS %d", numCells);
 	iprintf("#endif");
 	iprintf("");
+	iprintf(READ_CHAR_FMT, eofStr);
 	iprintf("int main() {");
 	level++;
 	iprintf("size_t i = 0;");

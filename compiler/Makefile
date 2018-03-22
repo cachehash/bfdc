@@ -11,7 +11,7 @@ bfc_fast:
 	make -j bfc
 
 %.c: %.b bfc_fast
-	./bfc $< -o $@
+	./bfc $(BFFLAGS) $< -o $@
 
 bfc: hash/libhash.a
 bfc: $(objs)

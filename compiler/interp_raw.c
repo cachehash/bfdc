@@ -26,7 +26,7 @@ void interpretRaw(Node* n, CELL_T* m, size_t* i) {
 		fflush(stdout);
 	break;
 	case IN:
-		m[*i] = getchar();
+		m[*i] = readChar(m[*i]);
 	break;
 	case SET: {
 		for (int k = 0; k < n->sz; k++) {

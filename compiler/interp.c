@@ -89,7 +89,7 @@ void interpret(size_t end, CELL_T * m) {
 			fflush(stdout);
 		break;
 		case IN:
-			m[i] = getchar();
+			m[i] = readChar(m[i]);
 		break;
 
 		case SET: {

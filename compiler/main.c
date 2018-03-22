@@ -10,6 +10,7 @@
 #include "interp.h"
 #include "dynarec.h"
 #include "comp.h"
+#include "main.h"
 
 #define INVALID_ARG 8
 #define EXTRA_ARGS 7
@@ -26,6 +27,9 @@ Node* root;
 
 int numCells = NUM_CELLS;
 
+int eofType = EOF_M1;
+char* eofStr = "-1";
+
 char* progName;
 
 int main(int argc, char** argv) {
@@ -34,7 +38,7 @@ int main(int argc, char** argv) {
 	char* outname = NULL;
 	char* ifile = NULL;
 	char opt;
-	while ((opt = getopt (argc, argv, "jdthio:c:")) != -1) {
+	while ((opt = getopt (argc, argv, "jdthio:c:E:")) != -1) {
 		switch (opt) {
 			case 'j':
 			case 'd':
@@ -55,6 +59,20 @@ int main(int argc, char** argv) {
 			break;
 			case 'c':
 				numCells = atoi(optarg);
+			break;
+			case 'E':
+				if (strcmp("unchanged", optarg) == 0 || strcmp("nc", optarg) == 0) {
+					eofType = EOF_NC;
+					eofStr = "prev";
+				} else if (strcmp("-1", optarg) == 0) {
+					eofType = EOF_M1;
+					eofStr = "-1";
+				} else if (strcmp("0", optarg) == 0) {
+					eofType = EOF_0;
+					eofStr = "0";
+				} else {
+					usage(INVALID_ARG);
+				}
 			break;
 			default:
 				usage(INVALID_ARG);
@@ -114,4 +132,21 @@ Examples:\n\
 , progName, progName);
 	exit(status);
 }
-
+CELL_T readChar(int prev) {
+	int x = getchar();
+	if (x == EOF) {
+		printf("read EOF!");
+		switch (eofType) {
+		case EOF_NC:
+			printf("returning %d\n", prev);
+			return prev;
+		case EOF_M1:
+			printf("returning -1");
+			return -1;
+		case EOF_0:
+			printf("returning 0");
+			return 0;
+		}
+	}
+	return x;
+}
