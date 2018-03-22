@@ -83,7 +83,7 @@ void comp() {
 	iprintf("#include <stdint.h>");
 	iprintf("");
 	iprintf("#ifndef CELL_T");
-	iprintf("#define CELL_T uint8_t");
+	iprintf("#define CELL_T %s", cell_t_str);
 	iprintf("#endif");
 	iprintf("");
 	iprintf("#ifndef NUM_CELLS");

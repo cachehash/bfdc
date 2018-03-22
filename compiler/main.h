@@ -55,5 +55,6 @@ CELL_T readChar();
 
 extern char* eofStr;
 extern int eofType;
+extern char* cell_t_str;
 
 #endif

@@ -29,16 +29,19 @@ int numCells = NUM_CELLS;
 
 int eofType = EOF_M1;
 char* eofStr = "-1";
+char* cell_t_str;
 
 char* progName;
 
 int main(int argc, char** argv) {
 	progName = argv[0];
+	cell_t_str = strdup("uint8_t");
 	int interpret = 0;
 	char* outname = NULL;
 	char* ifile = NULL;
 	char opt;
-	while ((opt = getopt (argc, argv, "jdthio:c:E:")) != -1) {
+	//TODO check if it's safe to not strdup optarg
+	while ((opt = getopt (argc, argv, "jdthio:c:E:C:")) != -1) {
 		switch (opt) {
 			case 'j':
 			case 'd':
@@ -55,10 +58,15 @@ int main(int argc, char** argv) {
 				interpret = 1;
 			break;
 			case 'o':
+				free(outname);
 				outname = strdup(optarg);
 			break;
 			case 'c':
 				numCells = atoi(optarg);
+			break;
+			case 'C':
+				free(cell_t_str);
+				cell_t_str = strdup(optarg);
 			break;
 			case 'E':
 				if (strcmp("unchanged", optarg) == 0 || strcmp("nc", optarg) == 0) {
@@ -129,6 +137,8 @@ int usage(int status) {
    -j -d     use dynamic recompilation to run the program\n\
    -o FILE   output name for the compiled brainfuck\n\
    -c NUM    number of cells to use\n\
+   -C TYPE   data type to use for cells\n\
+   -E EOF    format for EOF to use\n\
    -h        display this help text\n\
 \n\
 Examples:\n\
