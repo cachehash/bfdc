@@ -3,7 +3,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include "main.h"
-extern Node* root;
 int yylex();
 int lines = 1;
 int yyerror(const char* c) {

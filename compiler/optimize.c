@@ -27,6 +27,7 @@ int callAll(Node* n, int(*f)(Node**)) {
 	}
 	return 0;
 }
+int clipBranch(Node**);
 /*
  * concatenate multiple adds/subs together
  */
@@ -158,7 +159,9 @@ int useSet(Node** np) {
 				}
 			}
 			destroyMap(m);
+			clipBranch(np);
 			*np = new;
+			n = NULL;
 		}
 
 	}
@@ -176,4 +179,13 @@ void optimize(Node* n) {
 			changed |= useSet(&n);
 		}
 	}
+}
+int clipBranch(Node** np) {
+	Node *n = *np;
+	if (n == NULL) {
+		return 0;
+	}
+	callAll(n, clipBranch);
+	free(n);
+	return 0;
 }

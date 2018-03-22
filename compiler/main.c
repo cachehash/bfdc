@@ -1,50 +1,48 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <unistd.h>
 #include <string.h>
+
 #include "main.h"
 #include "hash/hash.h"
 
-#ifndef CELL_T
-#define CELL_T char
-#endif
-
 #include "optimize.h"
+#include "interp.h"
+#include "comp.h"
+
+#define INVALID_ARG 8
+#define EXTRA_ARGS 7
+#define INVALID_COMBINATION 6
+#define NO_INPUT 2
+
+extern int yyparse();
+extern FILE* yyin;
+
+int usage(int);
+FILE* outfile;
 
 Node* root;
 
-int yyparse();
-void comp();
-void interp();
-void interpTree();
-int usage();
-FILE* outfile;
-extern FILE* yyin;
+int numCells = NUM_CELLS;
 
+char* progName;
 
-typedef struct inst_t {
-	int type;
-	int amt;
-	Node* n;
-} inst_t;
-inst_t* imem = NULL;
-int pc;
-
-
-int numCells = 30000;
 int main(int argc, char** argv) {
+	progName = argv[0];
 	int interpret = 0;
 	char* outname = NULL;
 	char* ifile = NULL;
 	char opt;
-	while ((opt = getopt (argc, argv, "tio:c:")) != -1) {
+	while ((opt = getopt (argc, argv, "thio:c:")) != -1) {
 		switch (opt) {
-			case 'i':
-				interpret = 1;
-			break;
 			case 't':
 				interpret = 2;
+			break;
+			case 'h':
+				usage(0);
+			break;
+			case 'i':
+				interpret = 1;
 			break;
 			case 'o':
 				outname = strdup(optarg);
@@ -53,27 +51,27 @@ int main(int argc, char** argv) {
 				numCells = atoi(optarg);
 			break;
 			default:
-				usage();
+				usage(INVALID_ARG);
 		}
 	}
 	for (int i = optind; i < argc; i++) {
 		if (ifile) {
-			usage();
+			usage(EXTRA_ARGS);
 		}
 		ifile = argv[i];
 	}
 	if (outname && interpret) {
-		usage();
+		usage(INVALID_COMBINATION);
 	}
 	if (ifile == NULL) {
-		usage();
+		usage(NO_INPUT);
 	}
 	yyin = fopen(ifile, "r");
 	yyparse();
 	optimize(root);
 	if (interpret) {
 		if (interpret == 2) {
-			interpTree();
+			interpRaw();
 		} else {
 			interp();
 		}
@@ -87,231 +85,25 @@ int main(int argc, char** argv) {
 		comp();
 	}
 }
-int usage() {
-	printf("invalid args\n");
-	exit(1);
+int usage(int status) {
+	FILE* f = stdout;
+	if (status) {
+		//f = stderr;
+	}
+	fprintf(f, "Usage: %s [OPTION]... FILE\n", progName);
+	fprintf(f, "\
+\n\
+   -i        interpret the brainfuck code specified in FILE\n\
+   -t        interpret the parse tree used for compilation instead of compiling\n\
+   -o FILE   output name for the compiled brainfuck\n\
+   -c NUM    number of cells to use\n\
+   -h        display this help text\n\
+\n\
+Examples:\n\
+   %s -i hello.b            interpret the contents of hello.b\n\
+   %s hello.b -o hello.c    compile hello.b and output hello.c\n\
+"
+, progName, progName);
+	exit(status);
 }
 
-int level = 0;
-int iprintf(const char* fmt,...) {
-	va_list ap;
-	for (int i = 0; i < level; i++) {
-		fprintf(outfile, "\t");
-	}
-	va_start(ap, fmt);
-	vfprintf(outfile, fmt, ap);
-	fprintf(outfile, "\n");
-}
-void compile(Node* n) {
-	if (n == NULL) {
-		return;
-	}
-	switch (n->type) {
-	case LOOP:
-		iprintf("while(m[i]) {");
-		level++;
-		compile(n->n[0].n);
-		level--;
-		iprintf("}");
-	break;
-	case STMTS:
-		compile(n->n[0].n);
-		compile(n->n[1].n);
-	break;
-	case SUM:
-		iprintf("m[i] += %d;", n->n[0].i);
-	break;
-	case SHIFT:
-		iprintf("i += %d;", n->n[0].i);
-	break;
-	case OUT:
-		//iprintf("%s", "printf(\"%c\", m[i]);");
-		iprintf("putchar(m[i]);");
-	break;
-	case IN:
-		iprintf("m[i] = getchar();");
-	break;
-	case SET:
-		for (int i = 0; i < n->sz; i++) {
-			Point *p = &n->n[i].p;
-			iprintf("m[i+%d] += %d*m[i];", p->x, p->y);
-		}
-		iprintf("m[i] = 0;");
-	break;
-	}
-}
-void comp() {
-	iprintf("#include <stdio.h>");
-	iprintf("");
-	iprintf("#ifndef CELL_T");
-	iprintf("#define CELL_T char");
-	iprintf("#endif");
-	iprintf("");
-	iprintf("#ifndef NUM_CELLS");
-	iprintf("#define NUM_CELLS %d", numCells);
-	iprintf("#endif");
-	iprintf("");
-	iprintf("int main() {");
-	level++;
-	iprintf("size_t i = 0;");
-	iprintf("CELL_T m[NUM_CELLS] = {0};");
-	compile(root);
-	level--;
-	iprintf("}");
-}
-void interpretTree(Node* n, CELL_T* m, size_t* i) {
-	if (n == NULL) {
-		return;
-	}
-	switch (n->type) {
-	case LOOP:
-		while (m[*i]) {
-			interpretTree(n->n[0].n, m, i);
-		}
-	break;
-	case STMTS:
-		interpretTree(n->n[0].n, m, i);
-		interpretTree(n->n[1].n, m, i);
-	break;
-	case SUM:
-		m[*i] += n->n[0].i;
-	break;
-	case SHIFT:
-		*i += n->n[0].i;
-	break;
-	case OUT:
-		putchar(m[*i]);
-		fflush(stdout);
-	break;
-	case IN:
-		m[*i] = getchar();
-	break;
-	case SET:
-		for (int k = 0; k < n->sz; k++) {
-			Point *p = &n->n[k].p;
-			int x = p->x;
-			int y = p->y;
-			m[*i+x] += y*m[*i];
-		}
-		m[*i] = 0;
-	break;
-	}
-}
-void interpTree() {
-	CELL_T m[numCells];
-	for (int z = 0; z < numCells; z++) {
-		m[z] = 0;
-	}
-	size_t i[1] = {0};
-	interpretTree(root, m, i);
-}
-void mkInsts(Node* n) {
-	if (n == NULL) {
-		return;
-	}
-	switch (n->type) {
-	case LOOP: {
-		int dst = pc;
-		imem = realloc(imem, (pc+1)*sizeof(*imem));
-		imem[pc].type = n->type;
-		imem[pc].n = n;
-
-		pc++;
-
-		mkInsts(n->n[0].n);
-
-		imem = realloc(imem, (pc+1)*sizeof(*imem));
-		imem[dst].amt = pc;
-
-		imem[pc].type = n->type;
-		imem[pc].amt = dst;
-		imem[pc].n = NULL;
-		pc++;
-	}
-	break;
-
-	case STMTS:
-		mkInsts(n->n[0].n);
-		mkInsts(n->n[1].n);
-	break;
-
-	case SUM:
-	case SHIFT:
-		imem = realloc(imem, (pc+1)*sizeof(*imem));
-		imem[pc].type = n->type;
-		imem[pc].amt = n->n[0].i;
-		pc++;
-	break;
-
-	case OUT:
-	case IN:
-		imem = realloc(imem, (pc+1)*sizeof(*imem));
-		imem[pc].type = n->type;
-		pc++;
-	break;
-
-	case SET:
-		imem = realloc(imem, (pc+1)*sizeof(*imem));
-		imem[pc].type = n->type;
-		imem[pc].n = n;
-		pc++;
-	break;
-	}
-}
-void interpret(size_t end, CELL_T * m) {
-	size_t i = 0;
-	for (size_t k = 0; k < end; k++) {
-		switch (imem[k].type) {
-		case LOOP: {
-			int go = (m[i] != 0);
-			if (imem[k].n) {
-				go = !go;
-			}
-			if (go) {
-				k = imem[k].amt-1;
-				continue;
-			}
-		}
-		break;
-		case SUM:
-			m[i] += imem[k].amt;
-		break;
-		case SHIFT:
-			i += imem[k].amt;
-		break;
-		case OUT:
-			putchar(m[i]);
-			fflush(stdout);
-		break;
-		case IN:
-			m[i] = getchar();
-		break;
-
-		case SET: {
-			Node* n = imem[k].n;
-			for (int z = 0; z < n->sz; z++) {
-				Point *p = &n->n[z].p;
-				int x = p->x;
-				int y = p->y;
-				m[i+x] += y*m[i];
-			}
-			m[i] = 0;
-		}
-		break;
-		}
-	}
-}
-void interp() {
-	CELL_T m[numCells];
-	for (int z = 0; z < numCells; z++) {
-		m[z] = 0;
-	}
-	free(imem);
-	imem = malloc(0);
-	pc = 0;
-	size_t *isz = 0;
-	mkInsts(root);
-	size_t end = pc;
-	pc = 0;
-	interpret(end, m);
-}

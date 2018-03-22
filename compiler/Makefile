@@ -1,15 +1,18 @@
 .PHONY: clean all
+
+objs=parse.o lexer.o main.o optimize.o interp.o interp_raw.o comp.o
 CFLAGS=-Ofast
 
 LDLIBS=-lhash -Lhash
 
-all: bfc
+all:
+	make -j bfc
 
 %.c: %.b bfc
 	./bfc $< -o $@
 
 bfc: hash/libhash.a
-bfc: parse.o lexer.o main.o optimize.o
+bfc: $(objs)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
 hash/libhash.a:
