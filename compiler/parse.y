@@ -5,8 +5,9 @@
 #include "main.h"
 int yylex();
 int lines = 1;
+int chars = 0;
 int yyerror(const char* c) {
-	return fprintf(stderr, "ERROR on line %d: %s\n", lines, c);
+	return fprintf(stderr, "ERROR on line %d, col %d: %s\n", lines, chars, c);
 }
 
 Node* mkNode(int sz, int type) {
