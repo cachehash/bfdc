@@ -5,6 +5,10 @@
 #define OUT 4
 #define IN 5
 #define SET 6
+typedef struct Point {
+	int x;
+	int y;
+} Point;
 typedef struct Node {
 	int sz;
 	int type;
@@ -12,6 +16,8 @@ typedef struct Node {
 		struct Node* n;
 		void* v;
 		int i;
+		Point p;
 	} n[];
 } Node;
 
+extern Node* mkNode(int,int);
