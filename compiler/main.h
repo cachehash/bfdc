@@ -1,6 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 #include <stdio.h>
+#include <stdint.h>
 
 #define LOOP 0
 #define STMTS 1
@@ -11,7 +12,7 @@
 #define SET 6
 
 #ifndef CELL_T
-#define CELL_T char
+#define CELL_T uint8_t
 #endif
 
 #ifndef NUM_CELLS

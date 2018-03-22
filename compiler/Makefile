@@ -1,14 +1,16 @@
-.PHONY: clean all
+.PHONY: clean all bfc_fast
 
 objs=parse.o lexer.o main.o optimize.o interp.o interp_raw.o comp.o dynarec.o
 CFLAGS=-Ofast
 
 LDLIBS=-lhash -Lhash
 
-all:
+all: bfc_fast
+
+bfc_fast:
 	make -j bfc
 
-%.c: %.b bfc
+%.c: %.b bfc_fast
 	./bfc $< -o $@
 
 bfc: hash/libhash.a

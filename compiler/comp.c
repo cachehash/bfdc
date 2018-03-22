@@ -54,9 +54,11 @@ void compile(Node* n) {
 }
 void comp() {
 	iprintf("#include <stdio.h>");
+	iprintf("#include <stddef.h>");
+	iprintf("#include <stdint.h>");
 	iprintf("");
 	iprintf("#ifndef CELL_T");
-	iprintf("#define CELL_T char");
+	iprintf("#define CELL_T uint8_t");
 	iprintf("#endif");
 	iprintf("");
 	iprintf("#ifndef NUM_CELLS");
