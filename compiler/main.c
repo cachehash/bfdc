@@ -84,6 +84,7 @@ int main(int argc, char** argv) {
 		outname = NULL;
 		comp();
 	}
+	clipBranch(&root);
 }
 int usage(int status) {
 	FILE* f = stdout;

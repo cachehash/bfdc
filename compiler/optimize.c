@@ -42,7 +42,7 @@ int join(Node** np) {
 		Node* rtmp = n;
 		while (1) {
 			//get next STMTS
-			rtmp = rtmp->n[1].n;
+			rtmp = n->n[1].n;
 			if (rtmp == NULL) {
 				break;
 			}
@@ -70,8 +70,8 @@ int nullify(Node** np) {
 		return 0;
 	}
 	int changed = 0;
-	Node* left = n->n[0].n;
 	if (n->type == STMTS) {
+	Node* left = n->n[0].n;
 		//eliminate +- and ><
 		if (((left->type == SUM || left->type == SHIFT) && left->n[0].i == 0)) {
 			//remove n from tree and free it
@@ -148,6 +148,7 @@ int useSet(Node** np) {
 				int* val = mGet(m, k);
 				if (*k != 0 && *val == 0) {
 					mDel(m, k);
+					free(val);
 				}
 			}
 			mGetKeys(m, keys);
@@ -165,6 +166,7 @@ int useSet(Node** np) {
 					p->y = *val;
 					newIndx++;
 				}
+				free(val);
 			}
 			destroyMap(m);
 			clipBranch(np);
@@ -189,11 +191,11 @@ void optimize(Node* n) {
 	}
 }
 int clipBranch(Node** np) {
-	Node *n = *np;
-	if (n == NULL) {
+	if (*np == NULL) {
 		return 0;
 	}
-	callAll(n, clipBranch);
-	free(n);
+	callAll(*np, clipBranch);
+	free(*np);
+	*np = NULL;
 	return 0;
 }

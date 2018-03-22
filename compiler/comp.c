@@ -35,8 +35,8 @@ void compile(Node* n) {
 		iprintf("i += %d;", n->n[0].i);
 	break;
 	case OUT:
-		//iprintf("%s", "printf(\"%c\", m[i]);");
 		iprintf("putchar(m[i]);");
+		iprintf("fflush(stdout);");
 	break;
 	case IN:
 		iprintf("m[i] = getchar();");
