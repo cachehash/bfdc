@@ -2,3 +2,4 @@
 *.out
 /compiler/bfc
 *.swp
+*.o

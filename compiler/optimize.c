@@ -41,14 +41,20 @@ int join(Node** np) {
 		Node* lchild = n->n[0].n;
 		Node* rtmp = n;
 		while (1) {
+			//get next STMTS
 			rtmp = rtmp->n[1].n;
 			if (rtmp == NULL) {
 				break;
 			}
+			//get next STMT from code
 			Node* rlchild = rtmp->n[0].n;
+			//concatenate if same type of SUMs and SHIFTs
 			if (lchild->type == rlchild->type && (lchild->type == SUM || lchild->type == SHIFT)) {
 				lchild->n[0].i += rlchild->n[0].i;
+				//remove the STMT and STMTS from tree and free them
 				n->n[1].n = rtmp->n[1].n;
+				free(rlchild);
+				free(rtmp);
 				changed = 1;
 			} else {
 				break;
@@ -68,7 +74,9 @@ int nullify(Node** np) {
 	if (n->type == STMTS) {
 		//eliminate +- and ><
 		if (((left->type == SUM || left->type == SHIFT) && left->n[0].i == 0)) {
+			//remove n from tree and free it
 			*np = n->n[1].n;
+			free(n);
 			changed = 1;
 		}
 	}
