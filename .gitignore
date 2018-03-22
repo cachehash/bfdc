@@ -1,4 +1,6 @@
 /vimbf/*.c
+/a.c
+/a
 *.out
 /bfc
 *.swp
