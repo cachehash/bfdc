@@ -1,4 +1,5 @@
 .PHONY: clean all
+CFLAGS=-g
 
 all: bfc
 
