@@ -10,6 +10,7 @@ char readIn() {
 int dynarec() {
 #if defined(__mips__)
 	fprintf(stderr, "ERROR: mips is not supported\n");
+	return 1;
 	int buff[] = {
 		0x67bdfff8,				//daddiu $sp, $sp, -8
 		0xffbf0000,				//sd $ra, ($sp)
@@ -24,7 +25,6 @@ int dynarec() {
 	};
 	void (*f)() = (void*) buff;
 	f();
-	return 1;
 #elif defined(__arm__)
 	fprintf(stderr, "ERROR: arm is not supported\n");
 	return 1;
