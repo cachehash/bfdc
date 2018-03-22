@@ -47,5 +47,6 @@ void interpRaw() {
 		m[z] = 0;
 	}
 	size_t i[1] = {0};
+	I = i;
 	interpretRaw(root, m, i);
 }

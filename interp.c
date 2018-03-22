@@ -65,6 +65,7 @@ void mkInsts(Node* n) {
 }
 void interpret(size_t end, CELL_T * m) {
 	size_t i = 0;
+	I = &i;
 	for (size_t k = 0; k < end; k++) {
 		switch (imem[k].type) {
 		case LOOP: {

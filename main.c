@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
 
 #include "main.h"
 #include "hash/hash.h"
@@ -19,6 +20,7 @@
 
 extern int yyparse();
 extern FILE* yyin;
+extern void reg_segv();
 
 int usage(int);
 FILE* outfile;
@@ -33,7 +35,10 @@ char* cell_t_str = NULL;
 
 char* progName;
 
+size_t* I = 0;
+
 int main(int argc, char** argv) {
+	reg_segv();
 	progName = argv[0];
 	int interpret = 0;
 	char* outname = NULL;
@@ -163,4 +168,21 @@ CELL_T readChar(int prev) {
 		}
 	}
 	return x;
+}
+
+void sig_segv(int arg0) {
+	if (*I < 0 || *I > numCells) {
+		fprintf(stderr, "\nOut of bounds at cell %zd! Quitting.\n", *I);
+	} else {
+		SIG_DFL(arg0);
+	}
+	exit(SIGSEGV);
+}
+void reg_segv() {
+	struct sigaction sigact[1];
+	memset(sigact, 0, sizeof(*sigact));
+
+	sigact->sa_handler = sig_segv;
+	sigaction(SIGSEGV, sigact, NULL);
+	//sigaction(SIGBUS, sigact, NULL);
 }
