@@ -90,7 +90,13 @@ int main(int argc, char** argv) {
 	if (ifile == NULL) {
 		usage(NO_INPUT);
 	}
-	yyin = fopen(ifile, "r");
+	if (strcmp(ifile, "-") == 0) {
+		int in = dup(0);
+		close(0);
+		yyin = fdopen(in, "r");
+	} else {
+		yyin = fopen(ifile, "r");
+	}
 	yyparse();
 	optimize(root);
 	if (interpret) {
@@ -135,16 +141,12 @@ Examples:\n\
 CELL_T readChar(int prev) {
 	int x = getchar();
 	if (x == EOF) {
-		printf("read EOF!");
 		switch (eofType) {
 		case EOF_NC:
-			printf("returning %d\n", prev);
 			return prev;
 		case EOF_M1:
-			printf("returning -1");
 			return -1;
 		case EOF_0:
-			printf("returning 0");
 			return 0;
 		}
 	}
