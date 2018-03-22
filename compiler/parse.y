@@ -5,7 +5,7 @@
 #include "main.h"
 extern Node* root;
 int yylex();
-int lines;
+int lines = 1;
 int yyerror(const char* c) {
 	fprintf(stderr, "ERROR on line %d: %s\n", lines, c);
 }
