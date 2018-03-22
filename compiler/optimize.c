@@ -179,7 +179,7 @@ int useSet(Node** np) {
 				if (*k == 0) {
 					//TODO warn if loop is infinite
 				} else {
-					Point *p = &new->n[newIndx].p;
+					Point *p = new->n[newIndx].p = calloc(1, sizeof(Point));
 					p->x = *k;
 					p->y = *val;
 					newIndx++;
@@ -212,6 +212,14 @@ int clipBranch(Node** np) {
 	if (*np == NULL) {
 		return 0;
 	}
+	Node* n = *np;
+	//handle alloc children that aren't nodes
+	if (n->type == SET) {
+		for (int i = 1; i < n->sz; i++) {
+			free(n->n[i].p);
+		}
+	}
+	//handle regular nodes
 	callAll(*np, clipBranch);
 	free(*np);
 	*np = NULL;

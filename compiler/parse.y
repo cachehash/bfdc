@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include "main.h"
+
 int yylex();
 int lines = 1;
 int chars = 0;

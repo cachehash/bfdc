@@ -31,7 +31,7 @@ void interpretRaw(Node* n, CELL_T* m, size_t* i) {
 	case SET: {
 		int scale = n->n[0].i;
 		for (int k = 1; k < n->sz; k++) {
-			Point *p = &n->n[k].p;
+			Point *p = n->n[k].p;
 			int x = p->x;
 			int y = p->y;
 			m[*i+x] += (y*m[*i])/scale;

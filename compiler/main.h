@@ -2,6 +2,7 @@
 #define MAIN_H
 #include <stdio.h>
 #include <stdint.h>
+#include <stddef.h>
 
 #define LOOP 0
 #define STMTS 1
@@ -22,13 +23,13 @@
 typedef struct Point {
 	int x;
 	int y;
-	//int z;
+	int z;
 } Point;
 typedef union Child {
 	struct Node* n;
 	void* v;
-	int i;
-	Point p;
+	ptrdiff_t i;
+	Point* p;
 } Child;
 typedef struct Node {
 	int sz;

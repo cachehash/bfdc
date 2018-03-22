@@ -44,7 +44,7 @@ void compile(Node* n) {
 	case SET: {
 		int scale = n->n[0].i;
 		for (int i = 1; i < n->sz; i++) {
-			Point *p = &n->n[i].p;
+			Point *p = n->n[i].p;
 			iprintf("m[i+%d] += (%d*m[i])/%d;", p->x, p->y, scale);
 		}
 		iprintf("m[i] = 0;");

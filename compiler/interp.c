@@ -96,7 +96,7 @@ void interpret(size_t end, CELL_T * m) {
 			Node* n = imem[k].n;
 			int scale = n->n[0].i;
 			for (int z = 1; z < n->sz; z++) {
-				Point *p = &n->n[z].p;
+				Point *p = n->n[z].p;
 				int x = p->x;
 				int y = p->y;
 				m[i+x] += (y*m[i])/scale;
