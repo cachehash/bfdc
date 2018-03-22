@@ -22,16 +22,18 @@
 typedef struct Point {
 	int x;
 	int y;
+	//int z;
 } Point;
+typedef union Child {
+	struct Node* n;
+	void* v;
+	int i;
+	Point p;
+} Child;
 typedef struct Node {
 	int sz;
 	int type;
-	union {
-		struct Node* n;
-		void* v;
-		int i;
-		Point p;
-	} n[];
+	Child n[];
 } Node;
 extern int numCells;
 extern Node* mkNode(int,int);

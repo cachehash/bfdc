@@ -3,6 +3,20 @@
 #include "main.h"
 #include "hash/hash.h"
 
+int gcd(int a, int b)
+{
+	while (1)
+	{
+		if (b == 0) {
+			return a;
+		}
+		a %= b;
+		if (a == 0) {
+			return b;
+		}
+		b %= a;
+	}
+}
 int callAll(Node* n, int(*f)(Node**)) {
 	int changed = 0;
 	if (n == NULL) {

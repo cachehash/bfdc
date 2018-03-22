@@ -22,7 +22,7 @@ Node* buildNode(int sz, int type, ...) {
 	va_list ap;
 	va_start(ap, type);
 	for (int i = 0; i < sz; i++) {
-		n->n[i].v = va_arg(ap, void*);
+		n->n[i] = va_arg(ap, Child);
 	}
 	return n;
 }
