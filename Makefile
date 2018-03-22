@@ -1,7 +1,7 @@
 .PHONY: clean all bfc_fast
 
 objs=parse.o lexer.o main.o optimize.o interp.o interp_raw.o comp.o dynarec.o
-CFLAGS=-Ofast
+override CFLAGS := -Ofast $(CFLAGS)
 
 LDLIBS=-lhash -Lhash
 
@@ -9,6 +9,9 @@ all: bfc_fast
 
 bfc_fast:
 	make -j bfc
+
+debug:
+	make -j bfc CFLAGS='-O0 -g'
 
 %.c: %.b bfc_fast
 	./bfc $(BFFLAGS) $< -o $@
