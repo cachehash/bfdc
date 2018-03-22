@@ -12,6 +12,14 @@ void iprintf(const char* fmt,...) {
 	vfprintf(outfile, fmt, ap);
 	fprintf(outfile, "\n");
 }
+void iprintfnln(const char* fmt,...) {
+	va_list ap;
+	for (int i = 0; i < level; i++) {
+		fprintf(outfile, "\t");
+	}
+	va_start(ap, fmt);
+	vfprintf(outfile, fmt, ap);
+}
 void compile(Node* n) {
 	if (n == NULL) {
 		return;
@@ -42,10 +50,27 @@ void compile(Node* n) {
 		iprintf("m[i] = getchar();");
 	break;
 	case SET: {
-		int scale = n->n[0].i;
-		for (int i = 1; i < n->sz; i++) {
+		for (int i = 0; i < n->sz; i++) {
 			Point *p = n->n[i].p;
-			iprintf("m[i+%d] += (%d*m[i])/%d;", p->x, p->y, scale);
+			int x = p->x;
+			int y = p->y;
+			int scale = p->z;
+			//"m[i+%d] += (%d*m[i])/%d;", x, y, scale
+			iprintfnln("m[i");
+			if (x >= 0) {
+				fprintf(outfile, "+");
+			}
+			fprintf(outfile, "%d] += ", x);
+			if (y == 1) {
+				fprintf(outfile, "m[i]");
+			} else {
+				fprintf(outfile, "%d*m[i]", y);
+			}
+			if (scale == 1) {
+				fprintf(outfile, ";\n");
+			} else {
+				fprintf(outfile, "/%d;\n", scale);
+			}
 		}
 		iprintf("m[i] = 0;");
 	}

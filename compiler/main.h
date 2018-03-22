@@ -28,7 +28,8 @@ typedef struct Point {
 typedef union Child {
 	struct Node* n;
 	void* v;
-	ptrdiff_t i;
+	//TODO why can't this be ptrdiff_t
+	int i;
 	Point* p;
 } Child;
 typedef struct Node {

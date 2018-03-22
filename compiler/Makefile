@@ -15,11 +15,11 @@ bfc_fast:
 
 bfc: hash/libhash.a
 bfc: $(objs)
-	$(CC) $(CFLAGS) $(CPPFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(objs) $(LOADLIBES) $(LDLIBS) -o $@
 
 hash/libhash.a:
 	cd hash && make
 
 clean::
-	rm -vf parse.c lexer.c bfc a.c a.out test test.c a *.o
+	rm -vf parse.c lexer.c bfc a.c a.out test test.c a *.o mandelbrot
 	cd hash && make clean

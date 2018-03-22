@@ -162,17 +162,16 @@ int useSet(Node** np) {
 				int* k = keys[i];
 				int* val = mGet(m, k);
 				if (*k == 0) {
-					scale = *val;
+					scale = - *val;
 				} else if (*val == 0) {
 					mDel(m, k);
 					free(val);
 				}
 			}
 			mGetKeys(m, keys);
-			int quantity = m->size;
+			int quantity = m->size-1;
 			Node* new = mkNode(quantity, SET);
-			int newIndx = 1;
-			new->n[0].i = -scale;
+			int newIndx = 0;
 			for (int i = 0; i < m->size; i++) {
 				int* k = keys[i];
 				int* val = mGet(m, k);
@@ -180,8 +179,15 @@ int useSet(Node** np) {
 					//TODO warn if loop is infinite
 				} else {
 					Point *p = new->n[newIndx].p = calloc(1, sizeof(Point));
+					//offset
 					p->x = *k;
-					p->y = *val;
+
+					int v = gcd(*val, scale);
+					//int v = 1;
+					//numerator
+					p->y = *val/v;
+					//denominator
+					p->z = scale/v;
 					newIndx++;
 				}
 				free(val);
