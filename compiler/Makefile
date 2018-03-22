@@ -16,5 +16,5 @@ hash/libhash.a:
 	cd hash && make
 
 clean::
-	rm -vf parse.c lexer.c bfc a.c a.out test test.c
+	rm -vf parse.c lexer.c bfc a.c a.out test test.c a
 	cd hash && make clean
