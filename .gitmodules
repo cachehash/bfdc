@@ -1,3 +1,3 @@
-[submodule "compiler/hash"]
-	path = compiler/hash
+[submodule "hash"]
+	path = hash
 	url = git@github.com:cachehash/hash.git
