@@ -34,13 +34,17 @@ int main(int argc, char** argv) {
 	char* outname = NULL;
 	char* ifile = NULL;
 	char opt;
-	while ((opt = getopt (argc, argv, "thio:c:")) != -1) {
+	while ((opt = getopt (argc, argv, "jdthio:c:")) != -1) {
 		switch (opt) {
+			case 'j':
+			case 'd':
+				dynarec();
+				exit(0);
+			break;
 			case 't':
 				interpret = 2;
 			break;
 			case 'h':
-				dynarec();
 				usage(0);
 			break;
 			case 'i':
@@ -98,6 +102,7 @@ int usage(int status) {
 \n\
    -i        interpret the brainfuck code specified in FILE\n\
    -t        interpret the parse tree used for compilation instead of compiling\n\
+   -j -d     use dynamic recompilation to run the program\n\
    -o FILE   output name for the compiled brainfuck\n\
    -c NUM    number of cells to use\n\
    -h        display this help text\n\
