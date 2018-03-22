@@ -4,6 +4,7 @@
 #define SHIFT 3
 #define OUT 4
 #define IN 5
+#define SET 6
 typedef struct Node {
 	int sz;
 	int type;
