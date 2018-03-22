@@ -1,3 +1,4 @@
 *.c
 *.out
 /compiler/bfc
+*.swp
