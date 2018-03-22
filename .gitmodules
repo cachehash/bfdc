@@ -1,0 +1,3 @@
+[submodule "compiler/hash"]
+	path = compiler/hash
+	url = git@github.com:cachehash/hash.git
