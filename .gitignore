@@ -1,4 +1,4 @@
-*.c
+/*.c
 *.out
 /compiler/bfc
 *.swp
