@@ -23,7 +23,6 @@ Node* mkNode(int sz, int type, ...) {
 	return n;
 }
 %}
-
 %union {
 	char c;
 	Node* n;
@@ -51,7 +50,7 @@ op	: '+'			{$$ = mkNode(1, SUM, 1);}
     	| '-'			{$$ = mkNode(1, SUM, -1);}
 	| '>'			{$$ = mkNode(1, SHIFT, 1);}
 	| '<'			{$$ = mkNode(1, SHIFT, -1);}
-	| ','			{$$ = mkNode(0, OUT);}
-	| '.'			{$$ = mkNode(0, IN);}
+	| ','			{$$ = mkNode(0, IN);}
+	| '.'			{$$ = mkNode(0, OUT);}
 
 %%
