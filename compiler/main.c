@@ -29,13 +29,12 @@ int numCells = NUM_CELLS;
 
 int eofType = EOF_M1;
 char* eofStr = "-1";
-char* cell_t_str;
+char* cell_t_str = NULL;
 
 char* progName;
 
 int main(int argc, char** argv) {
 	progName = argv[0];
-	cell_t_str = strdup("uint8_t");
 	int interpret = 0;
 	char* outname = NULL;
 	char* ifile = NULL;
@@ -92,9 +91,10 @@ int main(int argc, char** argv) {
 		}
 		ifile = argv[i];
 	}
-	if (outname && interpret) {
+	if ((outname && interpret) || (cell_t_str && interpret)) {
 		usage(INVALID_COMBINATION);
 	}
+	cell_t_str = strdup("uint8_t");
 	if (ifile == NULL) {
 		usage(NO_INPUT);
 	}
