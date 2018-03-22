@@ -1,5 +1,5 @@
-/*.c
+/vimbf/*.c
 *.out
-/compiler/bfc
+/bfc
 *.swp
 *.o

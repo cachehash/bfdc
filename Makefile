@@ -1,23 +1,25 @@
-.PHONY: clean all
+.PHONY: clean all bfc_fast
 
-CFLAGS=-Ofast -Wno-unused-result
+objs=parse.o lexer.o main.o optimize.o interp.o interp_raw.o comp.o dynarec.o
+CFLAGS=-Ofast
 
+LDLIBS=-lhash -Lhash
 
+all: bfc_fast
 
-all: mandelbrot
-	./$<
+bfc_fast:
+	make -j bfc
 
-%.out: %.c
-	$(CC) $(CFLAGS) $< -o $@
+%.c: %.b bfc_fast
+	./bfc $(BFFLAGS) $< -o $@
 
-%.c: %.b compiler.out
-	./compiler.out < $< > $@
+bfc: hash/libhash.a
+bfc: $(objs)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(objs) $(LOADLIBES) $(LDLIBS) -o $@
 
-compiler.c: dbf2c.b
-	./vimbf $< $< +'normal k' +'w $@' +':qa!'
-	echo '}' >> $@
-compiler.out: compiler.c
-	$(CC) $(CFLAGS) $< -o $@
+hash/libhash.a:
+	cd hash && make
 
-clean:
-	rm *.c *.out
+clean::
+	rm -vf parse.c lexer.c bfc a.c a.out test test.c a *.o mandelbrot
+	cd hash && make clean
