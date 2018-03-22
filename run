@@ -1,4 +1,4 @@
-#!/usr/bin/vim +normal 2G0y$@"
+#!/usr/bin/vim +normal 2Gy$@"
 :se noswapfile:nnorem l <space>j0"qy$j0"wy$j0y$@"
 yljggO":sil! s/[^][><+-,.<>]/1/dd/\V"\v$y0k@"
 @q@w
