@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 int level = 0;
-int iprintf(const char* fmt,...) {
+void iprintf(const char* fmt,...) {
 	va_list ap;
 	for (int i = 0; i < level; i++) {
 		fprintf(outfile, "\t");

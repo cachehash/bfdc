@@ -8,6 +8,7 @@
 
 #include "optimize.h"
 #include "interp.h"
+#include "dynarec.h"
 #include "comp.h"
 
 #define INVALID_ARG 8
@@ -39,6 +40,7 @@ int main(int argc, char** argv) {
 				interpret = 2;
 			break;
 			case 'h':
+				dynarec();
 				usage(0);
 			break;
 			case 'i':

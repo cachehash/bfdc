@@ -1,6 +1,6 @@
 .PHONY: clean all
 
-objs=parse.o lexer.o main.o optimize.o interp.o interp_raw.o comp.o
+objs=parse.o lexer.o main.o optimize.o interp.o interp_raw.o comp.o dynarec.o
 CFLAGS=-Ofast
 
 LDLIBS=-lhash -Lhash

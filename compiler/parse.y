@@ -6,7 +6,7 @@
 int yylex();
 int lines = 1;
 int yyerror(const char* c) {
-	fprintf(stderr, "ERROR on line %d: %s\n", lines, c);
+	return fprintf(stderr, "ERROR on line %d: %s\n", lines, c);
 }
 
 Node* mkNode(int sz, int type) {
