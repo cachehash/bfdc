@@ -143,18 +143,22 @@ int useSet(Node** np) {
 			/*
 			 * first prune the map of redundant values
 			 */
+			int scale = 0;
 			for (int i = 0; i < m->size; i++) {
 				int* k = keys[i];
 				int* val = mGet(m, k);
-				if (*k != 0 && *val == 0) {
+				if (*k == 0) {
+					scale = *val;
+				} else if (*val == 0) {
 					mDel(m, k);
 					free(val);
 				}
 			}
 			mGetKeys(m, keys);
-			int quantity = m->size-1;
+			int quantity = m->size;
 			Node* new = mkNode(quantity, SET);
-			int newIndx = 0;
+			int newIndx = 1;
+			new->n[0].i = -scale;
 			for (int i = 0; i < m->size; i++) {
 				int* k = keys[i];
 				int* val = mGet(m, k);

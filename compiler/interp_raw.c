@@ -28,14 +28,16 @@ void interpretRaw(Node* n, CELL_T* m, size_t* i) {
 	case IN:
 		m[*i] = getchar();
 	break;
-	case SET:
-		for (int k = 0; k < n->sz; k++) {
+	case SET: {
+		int scale = n->n[0].i;
+		for (int k = 1; k < n->sz; k++) {
 			Point *p = &n->n[k].p;
 			int x = p->x;
 			int y = p->y;
-			m[*i+x] += y*m[*i];
+			m[*i+x] += (y*m[*i])/scale;
 		}
 		m[*i] = 0;
+	}
 	break;
 	}
 }
