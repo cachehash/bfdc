@@ -1,4 +1,5 @@
 /vimbf/*.c
+/vimbf/mandelbrot
 /a.c
 /a
 *.out

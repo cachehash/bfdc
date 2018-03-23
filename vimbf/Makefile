@@ -20,4 +20,4 @@ compiler.out: compiler.c
 	$(CC) $(CFLAGS) $< -o $@
 
 clean::
-	rm -vf *.c *.out
+	rm -vf *.c *.out mandelbrot

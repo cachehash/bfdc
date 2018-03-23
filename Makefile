@@ -30,3 +30,4 @@ clean::
 	for f in *.b ; do rm -vf "$${f%.b}" ; done
 	rm -vf bfdc parse.c lexer.c a.c a.out a *.o *.b
 	cd hash && make clean
+	cd vimbf && make clean
