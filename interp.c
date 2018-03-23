@@ -18,12 +18,14 @@ void grow(int amt) {
 		prev = amt;
 	}
 }
-void push(inst_t* i) {
+int push(inst_t* i) {
 	int sz = sizeof(*imem);
 	grow(pc+sz);
 	char* buff = (void*) imem;
-	memcpy(buff+pc, i, sz);
+	char* dest = buff+pc;
+	memcpy(dest, i, sz);
 	pc += sz;
+	return pc-sz;
 }
 
 #define I_ZERO 0x80
@@ -38,11 +40,13 @@ void mkInsts(Node* n) {
 		inst.type = n->type;
 		inst.imm = 1;
 
-		push(&inst);
+		int offset = push(&inst);
 
 		mkInsts(n->n[0].n);
 
-		imem[dst].amt = pc/sizeof(*imem);
+		char* buff = (void*) imem;
+		inst_t* begin = (void*) (buff+offset);
+		begin->amt = pc/sizeof(*imem);
 
 		inst.type = n->type;
 		inst.amt = dst;
