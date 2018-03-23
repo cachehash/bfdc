@@ -44,8 +44,9 @@ int main(int argc, char** argv) {
 	char* outname = NULL;
 	char* ifile = NULL;
 	char opt;
+	int optLevel = 3;
 	//TODO check if it's safe to not strdup optarg
-	while ((opt = getopt(argc, argv, "jdthio:c:E:C:")) != -1) {
+	while ((opt = getopt(argc, argv, "jdthio:c:E:C:O:")) != -1) {
 		switch (opt) {
 			case 'j':
 			case 'd':
@@ -86,6 +87,9 @@ int main(int argc, char** argv) {
 					usage(INVALID_ARG);
 				}
 			break;
+			case 'O':
+				optLevel = atoi(optarg);
+			break;
 			default:
 				usage(INVALID_ARG);
 		}
@@ -113,7 +117,7 @@ int main(int argc, char** argv) {
 		yyin = fopen(ifile, "r");
 	}
 	yyparse();
-	optimize(root);
+	optimize(root, optLevel);
 	if (interpret) {
 		if (interpret == 2) {
 			interpRaw();
@@ -143,6 +147,7 @@ int usage(int status) {
    -t        interpret the parse tree used for compilation instead of compiling\n\
    -j -d     use dynamic recompilation to run the program\n\
    -o FILE   output name for the compiled brainfuck\n\
+   -O NUM    optimization level\n\
    -c NUM    number of cells to use\n\
    -C TYPE   data type to use for cells\n\
    -E EOF    format for EOF to use\n\

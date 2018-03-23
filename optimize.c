@@ -203,14 +203,19 @@ ret:
 	changed |= callAll(*np, useSet);
 	return changed;
 }
-void optimize(Node* n) {
+void optimize(Node* n, int optLevel) {
+	if (optLevel <= 0) {
+		return;
+	}
 	int changed = 1;
 	while (changed) {
 		changed = 0;
 		changed |= join(&n);
 		changed |= nullify(&n);
 		if (!changed) {
-			changed |= useSet(&n);
+			if (optLevel >= 2) {
+				changed |= useSet(&n);
+			}
 		}
 	}
 }
