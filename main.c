@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
 	char* ifile = NULL;
 	char opt;
 	//TODO check if it's safe to not strdup optarg
-	while ((opt = getopt (argc, argv, "jdthio:c:E:C:")) != -1) {
+	while ((opt = getopt(argc, argv, "jdthio:c:E:C:")) != -1) {
 		switch (opt) {
 			case 'j':
 			case 'd':

@@ -1,28 +1,30 @@
-.PHONY: clean all bfc_fast
+.PHONY: clean all bfdc_fast debug
 
 objs=parse.o lexer.o main.o optimize.o interp.o interp_raw.o comp.o dynarec.o
 override CFLAGS := -Ofast $(CFLAGS)
 
 LDLIBS=-lhash -Lhash
 
-all: bfc_fast
+all: bfdc_fast
 
-bfc_fast:
-	make -j bfc
+bfdc_fast:
+	make -j bfdc
 
 debug:
-	make -j bfc CFLAGS='-O0 -g'
+	make -j bfdc CFLAGS='-O0 -g'
 
-%.c: %.b bfc_fast
-	./bfc $(BFFLAGS) $< -o $@
+%.c: %.b bfdc_fast
+	./bfdc $(BFFLAGS) $< -o $@
+%.b: samples/%.b
+	cp $< $@
 
-bfc: hash/libhash.a
-bfc: $(objs)
+bfdc: hash/libhash.a
+bfdc: $(objs)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(objs) $(LOADLIBES) $(LDLIBS) -o $@
 
 hash/libhash.a:
 	cd hash && make
 
 clean::
-	rm -vf parse.c lexer.c bfc a.c a.out test test.c a *.o mandelbrot
+	rm -vf parse.c lexer.c bfdc a.c a.out test test.c a *.o mandelbrot *.b
 	cd hash && make clean

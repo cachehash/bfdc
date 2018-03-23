@@ -5,11 +5,20 @@
 typedef struct inst_t {
 	int type;
 	int amt;
-	Node* n;
+	int imm;
+	int imm2;
 } inst_t;
 inst_t* imem = NULL;
 int pc;
+void grow(int amt) {
+	static int prev = 0;
+	if (amt > prev) {
+		imem = realloc(imem, amt*sizeof(*imem));
+		prev = amt;
+	}
+}
 
+#define I_ZERO 0x80
 void mkInsts(Node* n) {
 	if (n == NULL) {
 		return;
@@ -17,20 +26,20 @@ void mkInsts(Node* n) {
 	switch (n->type) {
 	case LOOP: {
 		int dst = pc;
-		imem = realloc(imem, (pc+1)*sizeof(*imem));
+		grow(pc+1);
 		imem[pc].type = n->type;
-		imem[pc].n = n;
+		imem[pc].imm = 1;
 
 		pc++;
 
 		mkInsts(n->n[0].n);
 
-		imem = realloc(imem, (pc+1)*sizeof(*imem));
+		grow(pc+1);
 		imem[dst].amt = pc;
 
 		imem[pc].type = n->type;
 		imem[pc].amt = dst;
-		imem[pc].n = NULL;
+		imem[pc].imm = 0;
 		pc++;
 	}
 	break;
@@ -42,7 +51,7 @@ void mkInsts(Node* n) {
 
 	case SUM:
 	case SHIFT:
-		imem = realloc(imem, (pc+1)*sizeof(*imem));
+		grow(pc+1);
 		imem[pc].type = n->type;
 		imem[pc].amt = n->n[0].i;
 		pc++;
@@ -50,15 +59,23 @@ void mkInsts(Node* n) {
 
 	case OUT:
 	case IN:
-		imem = realloc(imem, (pc+1)*sizeof(*imem));
+		grow(pc+1);
 		imem[pc].type = n->type;
 		pc++;
 	break;
 
 	case SET:
-		imem = realloc(imem, (pc+1)*sizeof(*imem));
-		imem[pc].type = n->type;
-		imem[pc].n = n;
+		for (int z = 0; z < n->sz; z++) {
+			Point *p = n->n[z].p;
+			grow(pc+1);
+			imem[pc].type = n->type;
+			imem[pc].amt = p->x;
+			imem[pc].imm = p->y;
+			imem[pc].imm2 = p->z;
+			pc++;
+		}
+		grow(pc+1);
+		imem[pc].type = I_ZERO;
 		pc++;
 	break;
 	}
@@ -70,7 +87,7 @@ void interpret(size_t end, CELL_T * m) {
 		switch (imem[k].type) {
 		case LOOP: {
 			int go = (m[i] != 0);
-			if (imem[k].n) {
+			if (imem[k].imm) {
 				go = !go;
 			}
 			if (go) {
@@ -92,16 +109,14 @@ void interpret(size_t end, CELL_T * m) {
 		case IN:
 			m[i] = readChar(m[i]);
 		break;
-
 		case SET: {
-			Node* n = imem[k].n;
-			for (int z = 0; z < n->sz; z++) {
-				Point *p = n->n[z].p;
-				int x = p->x;
-				int y = p->y;
-				int scale = p->z;
-				m[i+x] += (y*m[i])/scale;
-			}
+			int x = imem[k].amt;
+			int y = imem[k].imm;
+			int scale = imem[k].imm2;
+			m[i+x] += (y*m[i])/scale;
+		}
+		break;
+		case I_ZERO: {
 			m[i] = 0;
 		}
 		break;
