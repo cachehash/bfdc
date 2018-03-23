@@ -3,6 +3,6 @@
 /a.c
 /a
 *.out
-/bfc
+/bfdc
 *.swp
 *.o
