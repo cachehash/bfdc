@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "main.h"
 
 typedef struct inst_t {
@@ -14,43 +13,34 @@ int pc;
 void grow(int amt) {
 	static int prev = 0;
 	if (amt > prev) {
-		imem = realloc(imem, amt);
+		imem = realloc(imem, amt*sizeof(*imem));
 		prev = amt;
 	}
-}
-int push(inst_t* i, size_t sz) {
-	grow(pc+sz);
-	char* buff = (void*) imem;
-	char* dest = buff+pc;
-	memcpy(dest, i, sz);
-	pc += sz;
-	return pc-sz;
 }
 
 #define I_ZERO 0x80
 void mkInsts(Node* n) {
-	inst_t inst;
 	if (n == NULL) {
 		return;
 	}
 	switch (n->type) {
 	case LOOP: {
 		int dst = pc;
-		inst.type = n->type;
-		inst.imm = 1;
+		grow(pc+1);
+		imem[pc].type = n->type;
+		imem[pc].imm = 1;
 
-		int offset = push(&inst, 3*sizeof(int));
+		pc++;
 
 		mkInsts(n->n[0].n);
 
-		char* buff = (void*) imem;
-		inst_t* begin = (void*) (buff+offset);
-		begin->amt = pc;
+		grow(pc+1);
+		imem[dst].amt = pc;
 
-		inst.type = n->type;
-		inst.amt = dst;
-		inst.imm = 0;
-		push(&inst, 3*sizeof(int));
+		imem[pc].type = n->type;
+		imem[pc].amt = dst;
+		imem[pc].imm = 0;
+		pc++;
 	}
 	break;
 
@@ -61,82 +51,75 @@ void mkInsts(Node* n) {
 
 	case SUM:
 	case SHIFT:
-		inst.type = n->type;
-		inst.amt = n->n[0].i;
-		push(&inst, 2*sizeof(int));
+		grow(pc+1);
+		imem[pc].type = n->type;
+		imem[pc].amt = n->n[0].i;
+		pc++;
 	break;
 
 	case OUT:
 	case IN:
-		inst.type = n->type;
-		push(&inst, sizeof(int));
+		grow(pc+1);
+		imem[pc].type = n->type;
+		pc++;
 	break;
 
 	case SET:
 		for (int z = 0; z < n->sz; z++) {
 			Point *p = n->n[z].p;
-			inst.type = n->type;
-			inst.amt = p->x;
-			inst.imm = p->y;
-			inst.imm2 = p->z;
-			push(&inst, sizeof(inst_t));
+			grow(pc+1);
+			imem[pc].type = n->type;
+			imem[pc].amt = p->x;
+			imem[pc].imm = p->y;
+			imem[pc].imm2 = p->z;
+			pc++;
 		}
-		inst.type = I_ZERO;
-		push(&inst, sizeof(int));
+		grow(pc+1);
+		imem[pc].type = I_ZERO;
+		pc++;
 	break;
 	}
 }
 void interpret(size_t end, CELL_T * m) {
 	size_t i = 0;
 	I = &i;
-	char* buff = (void*) imem;
-	for (size_t k = 0; k < end;) {
-		inst_t* inst = (void*) (buff+k);
-		switch (inst->type) {
+	for (size_t k = 0; k < end; k++) {
+		switch (imem[k].type) {
 		case LOOP: {
 			int go = (m[i] != 0);
-			if (inst->imm) {
+			if (imem[k].imm) {
 				go = !go;
 			}
 			if (go) {
-				k = inst->amt;
+				k = imem[k].amt-1;
 				continue;
 			}
-			k += 3*sizeof(int);
 		}
 		break;
 		case SUM:
-			m[i] += inst->amt;
-			k += 2*sizeof(int);
+			m[i] += imem[k].amt;
 		break;
 		case SHIFT:
-			i += inst->amt;
-			k += 2*sizeof(int);
+			i += imem[k].amt;
 		break;
 		case OUT:
 			putchar(m[i]);
 			fflush(stdout);
-			k += sizeof(int);
 		break;
 		case IN:
 			m[i] = readChar(m[i]);
-			k += sizeof(int);
 		break;
 		case SET: {
-			int x = inst->amt;
-			int y = inst->imm;
-			int scale = inst->imm2;
+			int x = imem[k].amt;
+			int y = imem[k].imm;
+			int scale = imem[k].imm2;
 			m[i+x] += (y*m[i])/scale;
-			k += sizeof(inst_t);
 		}
 		break;
 		case I_ZERO: {
 			m[i] = 0;
-			k += sizeof(int);
 		}
 		break;
-		default:
-			exit(1);
 		}
 	}
 }
