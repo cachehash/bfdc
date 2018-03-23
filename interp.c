@@ -36,7 +36,7 @@ void mkInsts(Node* n) {
 	}
 	switch (n->type) {
 	case LOOP: {
-		int dst = pc/sizeof(*imem);
+		int dst = pc;
 		inst.type = n->type;
 		inst.imm = 1;
 
@@ -46,7 +46,7 @@ void mkInsts(Node* n) {
 
 		char* buff = (void*) imem;
 		inst_t* begin = (void*) (buff+offset);
-		begin->amt = pc/sizeof(*imem);
+		begin->amt = pc;
 
 		inst.type = n->type;
 		inst.amt = dst;
@@ -90,9 +90,9 @@ void mkInsts(Node* n) {
 void interpret(size_t end, CELL_T * m) {
 	size_t i = 0;
 	I = &i;
-	pc /= sizeof(*imem);
-	for (size_t k = 0; k < end; k++) {
-		inst_t* inst = &imem[k];
+	char* buff = (void*) imem;
+	for (size_t k = 0; k < end; k+=sizeof(*imem)) {
+		inst_t* inst = (void*) (buff+k);
 		switch (inst->type) {
 		case LOOP: {
 			int go = (m[i] != 0);
@@ -100,7 +100,7 @@ void interpret(size_t end, CELL_T * m) {
 				go = !go;
 			}
 			if (go) {
-				k = inst->amt-1;
+				k = inst->amt;
 				continue;
 			}
 		}
