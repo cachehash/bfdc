@@ -1,3 +1,4 @@
+.PRECIOUS: %.b
 .PHONY: clean all bfdc_fast debug
 
 objs=parse.o lexer.o main.o optimize.o interp.o interp_raw.o comp.o dynarec.o
@@ -26,5 +27,6 @@ hash/libhash.a:
 	cd hash && make
 
 clean::
-	rm -vf parse.c lexer.c bfdc a.c a.out test test.c a *.o mandelbrot *.b
+	for f in *.b ; do rm -vf "$${f%.b}" ; done
+	rm -vf bfdc parse.c lexer.c a.c a.out a *.o *.b
 	cd hash && make clean
