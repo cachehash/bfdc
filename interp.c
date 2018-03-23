@@ -18,8 +18,7 @@ void grow(int amt) {
 		prev = amt;
 	}
 }
-int push(inst_t* i) {
-	int sz = sizeof(*imem);
+int push(inst_t* i, size_t sz) {
 	grow(pc+sz);
 	char* buff = (void*) imem;
 	char* dest = buff+pc;
@@ -40,7 +39,7 @@ void mkInsts(Node* n) {
 		inst.type = n->type;
 		inst.imm = 1;
 
-		int offset = push(&inst);
+		int offset = push(&inst, 3*sizeof(int));
 
 		mkInsts(n->n[0].n);
 
@@ -51,7 +50,7 @@ void mkInsts(Node* n) {
 		inst.type = n->type;
 		inst.amt = dst;
 		inst.imm = 0;
-		push(&inst);
+		push(&inst, 3*sizeof(int));
 	}
 	break;
 
@@ -64,13 +63,13 @@ void mkInsts(Node* n) {
 	case SHIFT:
 		inst.type = n->type;
 		inst.amt = n->n[0].i;
-		push(&inst);
+		push(&inst, 2*sizeof(int));
 	break;
 
 	case OUT:
 	case IN:
 		inst.type = n->type;
-		push(&inst);
+		push(&inst, sizeof(int));
 	break;
 
 	case SET:
@@ -80,10 +79,10 @@ void mkInsts(Node* n) {
 			inst.amt = p->x;
 			inst.imm = p->y;
 			inst.imm2 = p->z;
-			push(&inst);
+			push(&inst, sizeof(inst_t));
 		}
 		inst.type = I_ZERO;
-		push(&inst);
+		push(&inst, sizeof(int));
 	break;
 	}
 }
@@ -91,7 +90,7 @@ void interpret(size_t end, CELL_T * m) {
 	size_t i = 0;
 	I = &i;
 	char* buff = (void*) imem;
-	for (size_t k = 0; k < end; k+=sizeof(*imem)) {
+	for (size_t k = 0; k < end;) {
 		inst_t* inst = (void*) (buff+k);
 		switch (inst->type) {
 		case LOOP: {
@@ -103,32 +102,41 @@ void interpret(size_t end, CELL_T * m) {
 				k = inst->amt;
 				continue;
 			}
+			k += 3*sizeof(int);
 		}
 		break;
 		case SUM:
 			m[i] += inst->amt;
+			k += 2*sizeof(int);
 		break;
 		case SHIFT:
 			i += inst->amt;
+			k += 2*sizeof(int);
 		break;
 		case OUT:
 			putchar(m[i]);
 			fflush(stdout);
+			k += sizeof(int);
 		break;
 		case IN:
 			m[i] = readChar(m[i]);
+			k += sizeof(int);
 		break;
 		case SET: {
 			int x = inst->amt;
 			int y = inst->imm;
 			int scale = inst->imm2;
 			m[i+x] += (y*m[i])/scale;
+			k += sizeof(inst_t);
 		}
 		break;
 		case I_ZERO: {
 			m[i] = 0;
+			k += sizeof(int);
 		}
 		break;
+		default:
+			exit(1);
 		}
 	}
 }
