@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include "main.h"
+#define YYMAXDEPTH 88888888
 
 int yylex();
 int lines = 1;
