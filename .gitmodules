@@ -1,3 +1,6 @@
 [submodule "hash"]
 	path = hash
 	url = git@github.com:cachehash/hash.git
+[submodule "samples"]
+	path = samples
+	url = git@github.com:cachehash/brainfuck-samples.git
