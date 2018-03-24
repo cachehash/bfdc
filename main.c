@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <getopt.h>
 #include <string.h>
 #include <signal.h>
 
@@ -46,7 +47,20 @@ int main(int argc, char** argv) {
 	char opt;
 	int optLevel = 3;
 	//TODO check if it's safe to not strdup optarg
-	while ((opt = getopt(argc, argv, "jdthio:c:E:C:O:")) != -1) {
+	static struct option long_opts[] = {
+		{"jit",		no_argument,		0, 'j'},
+		{"dynarec",	no_argument,		0, 'd'},
+		{"traverse",	no_argument,		0, 't'},
+		{"help",	no_argument,		0, 'h'},
+		{"interpret",	no_argument,		0, 'i'},
+		{"output",	required_argument,	0, 'o'},
+		{"num-cells",	required_argument,	0, 'c'},
+		{"eof",		required_argument,	0, 'E'},
+		{"cell-type",	required_argument,	0, 'C'},
+		{"optimize",	required_argument,	0, 'O'},
+		{0, 0, 0, 0}
+	};
+	while ((opt = getopt_long(argc, argv, "jdthio:c:C:E:O:", long_opts, NULL)) != -2) {
 		switch (opt) {
 			case 'j':
 			case 'd':
@@ -143,15 +157,15 @@ int usage(int status) {
 	fprintf(f, "Usage: %s [OPTION]... FILE\n", progName);
 	fprintf(f, "\
 \n\
-   -i        interpret the brainfuck code specified in FILE\n\
-   -t        interpret the parse tree used for compilation instead of compiling\n\
-   -j -d     use dynamic recompilation to run the program\n\
-   -o FILE   output name for the compiled brainfuck\n\
-   -O NUM    optimization level\n\
-   -c NUM    number of cells to use\n\
-   -C TYPE   data type to use for cells\n\
-   -E EOF    format for EOF to use\n\
-   -h        display this help text\n\
+   -i, --interpret              interpret the brainfuck code specified in FILE\n\
+   -t, --traverse               interpret the parse tree used for compilation instead of compiling\n\
+   -j, -d, --jit, --dynarec     use dynamic recompilation to run the program\n\
+   -o, --output=FILE            output name for the compiled brainfuck\n\
+   -O, --optimize=NUM           optimization level\n\
+   -c, --num-cells=NUM          number of cells to use\n\
+   -C, --cell-type=TYPE         data type to use for cells\n\
+   -E, --eof=TYPE               format for EOF to use\n\
+   -h, --help                   display this help text\n\
 \n\
 Examples:\n\
    %s -i hello.b            interpret the contents of hello.b\n\
