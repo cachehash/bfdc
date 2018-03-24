@@ -16,10 +16,10 @@ inst_t;
 char* buff = NULL;
 
 static inst_t dummy;
-const size_t TYPE_END = ((ptrdiff_t)&dummy.amt) - (ptrdiff_t)&dummy;
-const size_t AMT_END = ((ptrdiff_t)&dummy.imm) - (ptrdiff_t)&dummy;
-const size_t IMM_END = ((ptrdiff_t)&dummy.imm2) - (ptrdiff_t)&dummy;
-const size_t IMM2_END = sizeof(dummy);
+static const size_t TYPE_END = ((ptrdiff_t)&dummy.amt) - (ptrdiff_t)&dummy;
+static const size_t AMT_END = ((ptrdiff_t)&dummy.imm) - (ptrdiff_t)&dummy;
+static const size_t IMM_END = ((ptrdiff_t)&dummy.imm2) - (ptrdiff_t)&dummy;
+static const size_t IMM2_END = sizeof(dummy);
 
 int pc;
 static void grow(int amt) {
@@ -43,6 +43,8 @@ static int push(inst_t* i, size_t sz) {
 #define I_SHORT_SET 0x82
 void mkInsts(Node* n) {
 	inst_t inst;
+	//TODO why is this faster?
+	memset(&inst, 0, sizeof(inst));
 	if (n == NULL) {
 		return;
 	}
@@ -51,7 +53,6 @@ void mkInsts(Node* n) {
 		int sz = AMT_END;
 		int dst = pc+sz;
 		inst.type = n->type;
-		inst.imm = 1;
 
 		int offset = push(&inst, sz);
 
@@ -62,7 +63,6 @@ void mkInsts(Node* n) {
 
 		inst.type = I_LOOP_BACK;
 		inst.amt = dst;
-		inst.imm = 0;
 		push(&inst, sz);
 	}
 	break;
@@ -91,11 +91,11 @@ void mkInsts(Node* n) {
 			inst.type = n->type;
 			inst.amt = p->x;
 			inst.imm = p->y;
-			inst.imm2 = p->z;
 			if (p->z == 1) {
 				inst.type = I_SHORT_SET;
 				push(&inst, IMM_END);
 			} else {
+				inst.imm2 = p->z;
 				push(&inst, IMM2_END);
 			}
 		}
