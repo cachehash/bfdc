@@ -1,1 +1,0 @@
-../samples/mandelbrot.b

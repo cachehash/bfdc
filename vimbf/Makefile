@@ -10,10 +10,10 @@ all: mandelbrot
 %.out: %.c
 	$(CC) $(CFLAGS) $< -o $@
 
-%.c: %.b compiler.out
+%.c: %.bf compiler.out
 	./compiler.out < $< > $@
 
-compiler.c: dbf2c.b
+compiler.c: dbf2c.bf
 	./vimbf $< $< +'normal k' +'w $@' +':qa!'
 	echo '}' >> $@
 compiler.out: compiler.c
