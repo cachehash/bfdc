@@ -63,7 +63,7 @@ int join(Node** np) {
 			//get next STMT from code
 			Node* rlchild = rtmp->n[0].n;
 			//concatenate if same type of SUMs and SHIFTs
-			if (lchild->type == rlchild->type && (lchild->type == SUM || lchild->type == SHIFT)) {
+			if (lchild->type == rlchild->type && ((lchild->type == SUM && lchild->n[1].i == rlchild->n[1].i) || lchild->type == SHIFT)) {
 				lchild->n[0].i += rlchild->n[0].i;
 				//remove the STMT and STMTS from tree and free them
 				n->n[1].n = rtmp->n[1].n;
@@ -210,6 +210,12 @@ void optimize(Node* n, int optLevel) {
 	int changed = 1;
 	while (changed) {
 		changed = 0;
+		/*
+		 * TODO use a map to an aggressive join that propagates all >< operations to the end and add/subs with constant offsets.
+		 * This will allow us to concatenate +++>-<+++ to m[i] += 6; m[i+1] += -1;
+		 * + and - CAN'T move past . or , but > or < could with an offset.
+		 * probable put this in a new function and leave the old join behaviour for a lower optimization level.
+		 */
 		changed |= join(&n);
 		changed |= nullify(&n);
 		if (!changed) {

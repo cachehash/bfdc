@@ -30,12 +30,16 @@ Node* buildNode(int sz, int type, ...) {
 }
 %}
 %union {
+	int i;
 	char c;
 	Node* n;
 }
 
 %type<n> op
 %type<n> loop stmt stmts
+%type<i> inc shift
+%type<i> incs shifts
+%token<i> '+' '-' '>' '<'
 
 %define parse.error verbose 
 %%
@@ -52,10 +56,22 @@ stmt	: loop			{$$ = $1;}
 loop	: '[' stmts ']'		{$$ = buildNode(1, LOOP, $2);}
 
 
-op	: '+'			{$$ = buildNode(1, SUM, 1);}
-    	| '-'			{$$ = buildNode(1, SUM, -1);}
-	| '>'			{$$ = buildNode(1, SHIFT, 1);}
-	| '<'			{$$ = buildNode(1, SHIFT, -1);}
+inc	: '+'			{$$ = $1;}
+    	| '-'			{$$ = $1;}
+
+shift	: '>'			{$$ = $1;}
+    	| '<'			{$$ = $1;}
+
+incs	: inc			{$$ = $1;}
+	| incs inc		{$$ = $1 + $2;}
+	
+
+shifts	: shift			{$$ = $1;}
+	| shifts shift		{$$ = $1 + $2;}
+	
+
+op	: incs			{$$ = buildNode(2, SUM, $1, 0);}
+	| shifts		{$$ = buildNode(1, SHIFT, $1);}
 	| ','			{$$ = buildNode(0, IN);}
 	| '.'			{$$ = buildNode(0, OUT);}
 

@@ -6,3 +6,6 @@
 /bfdc
 *.swp
 *.o
+/parse.tab.h
+/parse.tab.c
+/lexer.c
