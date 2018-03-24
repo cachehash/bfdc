@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 		{"optimize",	required_argument,	0, 'O'},
 		{0, 0, 0, 0}
 	};
-	while ((opt = getopt_long(argc, argv, "jdthio:c:C:E:O:", long_opts, NULL)) != -2) {
+	while ((opt = getopt_long(argc, argv, "jdthio:c:C:E:O:", long_opts, NULL)) != -1) {
 		switch (opt) {
 			case 'j':
 			case 'd':
@@ -129,6 +129,10 @@ int main(int argc, char** argv) {
 		yyin = fdopen(in, "r");
 	} else {
 		yyin = fopen(ifile, "r");
+		if (yyin == NULL) {
+			fprintf(stderr, "ERROR: couldn't open file `%s'\n", ifile);
+			exit(1);
+		}
 	}
 	yyparse();
 	optimize(root, optLevel);
