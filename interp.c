@@ -13,38 +13,34 @@ typedef struct inst_t {
 __attribute__((packed))
 #endif
 inst_t;
-inst_t* imem = NULL;
+char* buff = NULL;
 
 static inst_t dummy;
-#define TYPE_END (((ptrdiff_t)&dummy.amt) - (ptrdiff_t)&dummy)
-#define AMT_END (((ptrdiff_t)&dummy.imm) - (ptrdiff_t)&dummy)
-#define IMM_END (((ptrdiff_t)&dummy.imm2) - (ptrdiff_t)&dummy)
-#define IMM2_END (sizeof(dummy))
+const size_t TYPE_END = ((ptrdiff_t)&dummy.amt) - (ptrdiff_t)&dummy;
+const size_t AMT_END = ((ptrdiff_t)&dummy.imm) - (ptrdiff_t)&dummy;
+const size_t IMM_END = ((ptrdiff_t)&dummy.imm2) - (ptrdiff_t)&dummy;
+const size_t IMM2_END = sizeof(dummy);
 
-/*
-#define TYPE_END (sizeof(dummy.type))
-#define AMT_END (sizeof(dummy) - sizeof(dummy.imm) - sizeof(dummy.imm2))
-#define IMM_END (sizeof(dummy) - sizeof(dummy.imm2))
-#define IMM2_END (sizeof(dummy))
-*/
 int pc;
-void grow(int amt) {
+static void grow(int amt) {
 	static int prev = 0;
 	if (amt > prev) {
-		imem = realloc(imem, amt);
+		buff = realloc(buff, amt);
 		prev = amt;
 	}
 }
-int push(inst_t* i, size_t sz) {
+static int push(inst_t* i, size_t sz) {
 	grow(pc+sz);
-	char* buff = (void*) imem;
 	char* dest = buff+pc;
 	memcpy(dest, i, sz);
+	int ret = pc;
 	pc += sz;
-	return pc-sz;
+	return ret;
 }
 
 #define I_ZERO 0x80
+#define I_LOOP_BACK 0x81
+#define I_SHORT_SET 0x82
 void mkInsts(Node* n) {
 	inst_t inst;
 	if (n == NULL) {
@@ -52,22 +48,22 @@ void mkInsts(Node* n) {
 	}
 	switch (n->type) {
 	case LOOP: {
-		int dst = pc+IMM_END;
+		int sz = AMT_END;
+		int dst = pc+sz;
 		inst.type = n->type;
 		inst.imm = 1;
 
-		int offset = push(&inst, IMM_END);
+		int offset = push(&inst, sz);
 
 		mkInsts(n->n[0].n);
 
-		char* buff = (void*) imem;
 		inst_t* begin = (void*) (buff+offset);
-		begin->amt = pc+IMM_END;
+		begin->amt = pc+sz;
 
-		inst.type = n->type;
+		inst.type = I_LOOP_BACK;
 		inst.amt = dst;
 		inst.imm = 0;
-		push(&inst, IMM_END);
+		push(&inst, sz);
 	}
 	break;
 
@@ -96,7 +92,12 @@ void mkInsts(Node* n) {
 			inst.amt = p->x;
 			inst.imm = p->y;
 			inst.imm2 = p->z;
-			push(&inst, sizeof(inst_t));
+			if (p->z == 1) {
+				inst.type = I_SHORT_SET;
+				push(&inst, IMM_END);
+			} else {
+				push(&inst, IMM2_END);
+			}
 		}
 		inst.type = I_ZERO;
 		push(&inst, TYPE_END);
@@ -106,20 +107,23 @@ void mkInsts(Node* n) {
 void interpret(size_t end, CELL_T * m) {
 	size_t i = 0;
 	I = &i;
-	char* buff = (void*) imem;
 	for (size_t k = 0; k < end;) {
 		inst_t* inst = (void*) (buff+k);
 		switch (inst->type) {
 		case LOOP: {
-			int go = (m[i] != 0);
-			if (inst->imm) {
-				go = !go;
-			}
-			if (go) {
+			if (m[i] == 0) {
 				k = inst->amt;
 				continue;
 			}
-			k += IMM_END;
+			k += AMT_END;
+		}
+		break;
+		case I_LOOP_BACK: {
+			if (m[i] != 0) {
+				k = inst->amt;
+				continue;
+			}
+			k += AMT_END;
 		}
 		break;
 		case SUM:
@@ -144,7 +148,14 @@ void interpret(size_t end, CELL_T * m) {
 			int y = inst->imm;
 			int scale = inst->imm2;
 			m[i+x] += (y*m[i])/scale;
-			k += sizeof(inst_t);
+			k += IMM2_END;
+		}
+		break;
+		case I_SHORT_SET: {
+			int x = inst->amt;
+			int y = inst->imm;
+			m[i+x] += (y*m[i]);
+			k += IMM_END;
 		}
 		break;
 		case I_ZERO: {
@@ -162,13 +173,13 @@ void interp() {
 	for (int z = 0; z < numCells; z++) {
 		m[z] = 0;
 	}
-	imem = malloc(0);
+	buff = malloc(0);
 	pc = 0;
 	size_t *isz = 0;
 	mkInsts(root);
 	size_t end = pc;
 	pc = 0;
 	interpret(end, m);
-	free(imem);
-	imem = NULL;
+	free(buff);
+	buff = NULL;
 }
