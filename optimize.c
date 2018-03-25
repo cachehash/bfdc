@@ -169,9 +169,9 @@ int useSet(Node** np) {
 				}
 			}
 			mGetKeys(m, keys);
-			int quantity = m->size-1;
+			int quantity = m->size;
 			Node* new = mkNode(quantity, SET);
-			int newIndx = 0;
+			int newIndx = 1;
 			for (int i = 0; i < m->size; i++) {
 				int* k = keys[i];
 				int* val = mGet(m, k);

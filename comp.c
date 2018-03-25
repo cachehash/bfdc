@@ -69,7 +69,7 @@ void compile(Node* n) {
 	break;
 	case SET: {
 		int off = 0;//n->n[0].i;
-		for (int i = 0; i < n->sz; i++) {
+		for (int i = 1; i < n->sz; i++) {
 			Point *p = n->n[i].p;
 			int x = p->x;
 			int y = p->y;
