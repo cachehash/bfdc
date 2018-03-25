@@ -62,6 +62,7 @@ inc	: '+'			{$$ = $1;}
 shift	: '>'			{$$ = $1;}
     	| '<'			{$$ = $1;}
 
+//TODO these cause shift reduce conflicts
 incs	: inc			{$$ = $1;}
 	| incs inc		{$$ = $1 + $2;}
 	
