@@ -85,7 +85,7 @@ int nullify(Node** np) {
 	}
 	int changed = 0;
 	if (n->type == STMTS) {
-	Node* left = n->n[0].n;
+		Node* left = n->n[0].n;
 		//eliminate +- and ><
 		if (((left->type == SUM || left->type == SHIFT) && left->n[0].i == 0)) {
 			//remove n from tree and free it
@@ -94,7 +94,7 @@ int nullify(Node** np) {
 			changed = 1;
 		}
 	}
-	changed |= callAll(n, nullify);
+	changed |= callAll(*np, nullify);
 	return changed;
 }
 int useSet(Node** np) {
@@ -218,6 +218,7 @@ int delayShift(Node** np) {
 				if (shift == NULL) {
 					shift = n;
 
+					//remove from tree
 					*pRef = n->n[1].n;
 					n = *pRef;
 
@@ -227,9 +228,11 @@ int delayShift(Node** np) {
 
 					Node* old = n;
 
+					//remove from tree
 					*pRef = n->n[1].n;
 					n = *pRef;
 
+					//free
 					free(nl);
 					free(old);
 					changed |= 1;
