@@ -282,7 +282,7 @@ void optimize(Node* n, int optLevel) {
 			if (optLevel >= 2) {
 				changed |= useSet(&n);
 			}
-			//changed |= delayShift(&n);
+			changed |= delayShift(&n);
 		}
 	}
 }

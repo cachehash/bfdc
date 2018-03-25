@@ -68,13 +68,13 @@ void compile(Node* n) {
 	}
 	break;
 	case SET: {
-		int off = 0;//n->n[0].i;
+		int off = n->n[0].i;
 		for (int i = 1; i < n->sz; i++) {
 			Point *p = n->n[i].p;
 			int x = p->x;
 			int y = p->y;
 			int scale = p->z;
-			//"m[i+%d] += (%d*m[i])/%d;", x, y, scale
+			//"m[i+%d] += (%d*m[i+%d])/%d;", x+off, y, off, scale
 			iprintfnln("m[i");
 			if (x+off >= 0) {
 				fprintf(outfile, "+");
@@ -92,7 +92,7 @@ void compile(Node* n) {
 				fprintf(outfile, "/%d;\n", scale);
 			}
 		}
-		iprintf("m[i] = 0;");
+		iprintf("m[i+%d] = 0;", off);
 	}
 	break;
 	}
