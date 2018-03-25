@@ -91,6 +91,7 @@ int nullify(Node** np) {
 			//remove n from tree and free it
 			*np = n->n[1].n;
 			free(n);
+			free(left);
 			changed = 1;
 		}
 	}
