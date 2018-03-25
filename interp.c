@@ -86,7 +86,7 @@ void mkInsts(Node* n) {
 	break;
 
 	case SET:
-		for (int z = 1; z < n->sz; z++) {
+		for (int z = 0; z < n->sz; z++) {
 			Point *p = n->n[z].p;
 			inst.type = n->type;
 			inst.amt = p->x;

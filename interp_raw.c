@@ -29,7 +29,7 @@ void interpretRaw(Node* n, CELL_T* m, size_t* i) {
 		m[*i] = readChar(m[*i]);
 	break;
 	case SET: {
-		for (int k = 1; k < n->sz; k++) {
+		for (int k = 0; k < n->sz; k++) {
 			Point *p = n->n[k].p;
 			int x = p->x;
 			int y = p->y;

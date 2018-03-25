@@ -169,10 +169,10 @@ int useSet(Node** np) {
 				}
 			}
 			mGetKeys(m, keys);
-			int quantity = m->size;
+			int quantity = m->size-1;
 			Node* new = mkNode(quantity, SET);
 			int newIndx = 0;
-			for (int i = 1; i < m->size; i++) {
+			for (int i = 0; i < m->size; i++) {
 				int* k = keys[i];
 				int* val = mGet(m, k);
 				if (*k == 0) {
@@ -282,7 +282,7 @@ void optimize(Node* n, int optLevel) {
 			if (optLevel >= 2) {
 				changed |= useSet(&n);
 			}
-			changed |= delayShift(&n);
+			//changed |= delayShift(&n);
 		}
 	}
 }
