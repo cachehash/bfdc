@@ -270,12 +270,6 @@ void optimize(Node* n, int optLevel) {
 	 */
 	while (changed) {
 		changed = 0;
-		/*
-		 * TODO use a map to an aggressive join that propagates all >< operations to the end and add/subs with constant offsets.
-		 * This will allow us to concatenate +++>-<+++ to m[i] += 6; m[i+1] += -1;
-		 * + and - CAN'T move past . or , but > or < could with an offset.
-		 * probable put this in a new function and leave the old join behaviour for a lower optimization level.
-		 */
 		changed |= join(&n);
 		changed |= nullify(&n);
 		if (!changed) {
