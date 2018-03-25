@@ -183,7 +183,6 @@ int useSet(Node** np) {
 					p->x = *k;
 
 					int v = gcd(*val, scale);
-					//int v = 1;
 					//numerator
 					p->y = *val/v;
 					//denominator
@@ -257,9 +256,9 @@ int delayShift(Node** np) {
 			*pRef = shift;
 		}
 	}
-	return changed | callAll(*np, delayShift);
+	return changed | callAll(*pRef, delayShift);
 }
-void optimize(Node* n, int optLevel) {
+void optimize(Node** n, int optLevel) {
 	if (optLevel <= 0) {
 		return;
 	}
@@ -270,14 +269,14 @@ void optimize(Node* n, int optLevel) {
 	 */
 	while (changed) {
 		changed = 0;
-		changed |= join(&n);
-		changed |= nullify(&n);
+		changed |= join(n);
+		changed |= nullify(n);
 		if (!changed) {
 			if (optLevel >= 2) {
-				changed |= useSet(&n);
+				changed |= useSet(n);
 			}
 			if (optLevel >= 3) {
-				changed |= delayShift(&n);
+				changed |= delayShift(n);
 			}
 		}
 	}

@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
 		}
 	}
 	yyparse();
-	optimize(root, optLevel);
+	optimize(&root, optLevel);
 	if (interpret) {
 		if (interpret == 2) {
 			interpRaw();
