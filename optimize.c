@@ -212,7 +212,7 @@ int delayShift(Node** np) {
 	int changed = 0;
 	if (n->type == STMTS) {
 		Node* shift = NULL;
-		while (n) {
+		while (n != NULL) {
 			Node* nl = n->n[0].n;
 			int t = nl->type;
 			if (t == SHIFT) {

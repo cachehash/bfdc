@@ -72,7 +72,7 @@ shifts	: shift			{$$ = $1;}
 
 op	: incs			{$$ = buildNode(2, SUM, $1, 0);}
 	| shifts		{$$ = buildNode(1, SHIFT, $1);}
-	| ','			{$$ = buildNode(0, IN);}
-	| '.'			{$$ = buildNode(0, OUT);}
+	| ','			{$$ = buildNode(1, IN, 0);}
+	| '.'			{$$ = buildNode(1, OUT, 0);}
 
 %%
