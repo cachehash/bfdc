@@ -36,21 +36,39 @@ void compile(Node* n) {
 		compile(n->n[0].n);
 		compile(n->n[1].n);
 	break;
-	case SUM:
-		iprintf("m[i] += %d;", n->n[0].i);
+	case SUM: {
+		int off = n->n[1].i;
+		iprintfnln("m[i");
+		if (off != 0) {
+			fprintf(outfile, "+%d", off);
+		}
+		fprintf(outfile, "] += %d;\n", n->n[0].i);
+	}
 	break;
 	case SHIFT:
 		iprintf("i += %d;", n->n[0].i);
 	break;
-	case OUT:
-		iprintf("putchar(m[i]);");
+	case OUT: {
+		int off = n->n[0].i;
+		iprintfnln("putchar(m[i");
+		if (off != 0) {
+			fprintf(outfile, "+%d", off);
+		}
+		fprintf(outfile, "]);\n");
 		iprintf("fflush(stdout);");
+	}
 	break;
-	case IN:
-		iprintf("m[i] = readChar(m[i]);");
+	case IN: {
+		int off = n->n[0].i;
+		if (off != 0) {
+			iprintf("m[i+%d] = readChar(m[i+%d]);", off, off);
+		} else {
+			iprintf("m[i] = readChar(m[i]);");
+		}
+	}
 	break;
 	case SET: {
-		for (int i = 0; i < n->sz; i++) {
+		for (int i = 1; i < n->sz; i++) {
 			Point *p = n->n[i].p;
 			int x = p->x;
 			int y = p->y;

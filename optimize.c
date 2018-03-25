@@ -169,10 +169,10 @@ int useSet(Node** np) {
 				}
 			}
 			mGetKeys(m, keys);
-			int quantity = m->size-1;
+			int quantity = m->size;
 			Node* new = mkNode(quantity, SET);
 			int newIndx = 0;
-			for (int i = 0; i < m->size; i++) {
+			for (int i = 1; i < m->size; i++) {
 				int* k = keys[i];
 				int* val = mGet(m, k);
 				if (*k == 0) {
@@ -203,11 +203,71 @@ ret:
 	changed |= callAll(*np, useSet);
 	return changed;
 }
+int delayShift(Node** np) {
+	Node* n = *np;
+	if (n == NULL) {
+		return 0;
+	}
+	Node** pRef = np;
+	int changed = 0;
+	if (n->type == STMTS) {
+		Node* shift = NULL;
+		while (n) {
+			Node* nl = n->n[0].n;
+			int t = nl->type;
+			if (t == SHIFT) {
+				if (shift == NULL) {
+					shift = n;
+
+					*pRef = n->n[1].n;
+					n = *pRef;
+
+					shift->n[1].n = NULL;
+				} else {
+					shift->n[0].n->n[0].i += nl->n[0].i;
+
+					Node* old = n;
+
+					*pRef = n->n[1].n;
+					n = *pRef;
+
+					free(nl);
+					free(old);
+					changed |= 1;
+				}
+			} else if (t == SUM || t == OUT || t == IN || t == SET) {
+				int* off;
+				if (t == SUM) {
+					off = &nl->n[1].i;
+				} else {
+					off = &nl->n[0].i;
+				}
+				if (shift != NULL) {
+					*off += shift->n[0].n->n[0].i;
+					changed |= 1;
+				}
+				pRef = &n->n[1].n;
+				n = *pRef;
+			} else {
+				break;
+			}
+		}
+		if (shift != NULL) {
+			shift->n[1].n = *pRef;
+			*pRef = shift;
+		}
+	}
+	return changed | callAll(*np, delayShift);
+}
 void optimize(Node* n, int optLevel) {
 	if (optLevel <= 0) {
 		return;
 	}
 	int changed = 1;
+	/*
+	 * TODO a lot of the optimization functions are both iterative
+	 * and recursive O(n**2). Try to go through and make them O(n)
+	 */
 	while (changed) {
 		changed = 0;
 		/*
@@ -222,6 +282,7 @@ void optimize(Node* n, int optLevel) {
 			if (optLevel >= 2) {
 				changed |= useSet(&n);
 			}
+			changed |= delayShift(&n);
 		}
 	}
 }
