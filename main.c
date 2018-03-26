@@ -31,7 +31,6 @@ Node* root;
 int numCells = NUM_CELLS;
 
 int eofType = EOF_M1;
-char* eofStr = "-1";
 char* cell_t_str = NULL;
 
 char* progName;
@@ -90,13 +89,10 @@ int main(int argc, char** argv) {
 			case 'E':
 				if (strcmp("unchanged", optarg) == 0 || strcmp("nc", optarg) == 0) {
 					eofType = EOF_NC;
-					eofStr = "*cell";
 				} else if (strcmp("-1", optarg) == 0) {
 					eofType = EOF_M1;
-					eofStr = "-1";
 				} else if (strcmp("0", optarg) == 0) {
 					eofType = EOF_0;
-					eofStr = "0";
 				} else {
 					usage(INVALID_ARG);
 				}
@@ -116,9 +112,6 @@ int main(int argc, char** argv) {
 	}
 	if ((outname && interpret) || (cell_t_str && interpret)) {
 		usage(INVALID_COMBINATION);
-	}
-	if (cell_t_str == NULL) {
-		cell_t_str = strdup("uint8_t");
 	}
 	if (ifile == NULL) {
 		usage(NO_INPUT);
@@ -147,9 +140,9 @@ int main(int argc, char** argv) {
 			outname = strdup("a.c");
 		}
 		outfile = fopen(outname, "w");
+		comp(outname);
 		free(outname);
 		outname = NULL;
-		comp();
 	}
 	clipBranch(&root);
 }

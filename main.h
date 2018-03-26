@@ -24,12 +24,6 @@
 #define EOF_0 1
 #define EOF_NC 2
 
-#define READ_CHAR_FMT \
-"void readChar(CELL_T* cell) {\n\t"\
-	"int x = getchar();\n\t"\
-	"*cell = (x == EOF) ? %s : x;\n}"
-
-#define EOF_0_STR READ_CHAR_HEAD 
 typedef struct Point {
 	int x;
 	int y;
@@ -53,7 +47,6 @@ extern Node* root;
 extern FILE* outfile;
 CELL_T readChar();
 
-extern char* eofStr;
 extern int eofType;
 extern char* cell_t_str;
 extern size_t* I;

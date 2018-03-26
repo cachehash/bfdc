@@ -1,7 +1,7 @@
 .PRECIOUS: %.bf
 .PHONY: clean all bfdc_fast debug
 
-objs=parse.tab.o lexer.o main.o optimize.o interp.o interp_raw.o comp.o dynarec.o
+objs=parse.tab.o lexer.o main.o optimize.o interp.o interp_raw.o dynarec.o comp.o comp_c.o comp_go.o
 override CFLAGS := -Ofast -march=native $(CFLAGS)
 
 LDLIBS=-lhash -Lhash
@@ -15,6 +15,8 @@ debug:
 	make -j bfdc CFLAGS='-O0 -g'
 
 %.c: %.bf bfdc_fast
+	./bfdc $(BFFLAGS) $< -o $@
+%.go: %.bf bfdc_fast
 	./bfdc $(BFFLAGS) $< -o $@
 %.bf: samples/%.bf
 	cp $< $@
@@ -32,6 +34,6 @@ hash/libhash.a:
 
 clean::
 	for f in *.bf ; do rm -vf "$${f%.bf}" ; done
-	rm -vf bfdc parse.tab.c parse.tab.h lexer.c a.c a.out a *.o *.bf
+	rm -vf bfdc parse.tab.c parse.tab.h lexer.c a.c a.out a *.o *.bf *.go
 	cd hash && make clean
 	cd vimbf && make clean
