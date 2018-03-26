@@ -67,13 +67,21 @@ void compileSpim(Node* n, int* labelId) {
 			int scale = p->z;
 			//"m[i+%d] += (%d*m[i+%d])/%d;", x+off, y, off, scale
 			iprintfln("lb $t0, %d($sp)", -x-off);
-			iprintfln("li $t1, %d", y);
-			iprintfln("mult $t3, $t1");
-			iprintfln("mflo $t1");
-			iprintfln("li $t2, %d", scale);
-			iprintfln("div $t1, $t2");
-			iprintfln("mflo $t1");
-			iprintfln("add $t0, $t0, $t1");
+			//TODO check if y or scale is a power of 2 and use a shift
+			int reg = 3;
+			if (y != 1) {
+				iprintfln("li $t1, %d", y);
+				iprintfln("mult $t3, $t1");
+				iprintfln("mflo $t1");
+				reg = 1;
+			}
+			if (scale != 1) {
+				iprintfln("li $t2, %d", scale);
+				iprintfln("div $t%d, $t2", reg);
+				iprintfln("mflo $t1");
+				reg = 1;
+			}
+			iprintfln("add $t0, $t0, $t%d", reg);
 			iprintfln("sb $t0, %d($sp)", -x-off);
 		}
 		iprintfln("sb $0, %d($sp)", -off);
