@@ -10,5 +10,6 @@ extern void iprintCoeff(int x);
 extern void iprintDiv(int x);
 extern void compC();
 extern void compGo();
+extern void compSpim();
 
 #endif

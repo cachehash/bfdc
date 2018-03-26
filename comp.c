@@ -55,6 +55,8 @@ void comp(char* outname) {
 		compC();
 	} else if (strcmp(outname, "go") == 0) {
 		compGo();
+	} else if (strcmp(outname, "s") == 0) {
+		compSpim();
 	} else {
 		fprintf(stderr, "ERROR: `%s': unrecognized file type\n", outname);
 		exit(1);
