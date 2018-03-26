@@ -25,9 +25,9 @@
 #define EOF_NC 2
 
 #define READ_CHAR_FMT \
-"CELL_T readChar(int prev) {\n\t"\
+"void readChar(CELL_T* cell) {\n\t"\
 	"int x = getchar();\n\t"\
-	"return (x == EOF) ? %s : x;\n}"
+	"*cell = (x == EOF) ? %s : x;\n}"
 
 #define EOF_0_STR READ_CHAR_HEAD 
 typedef struct Point {

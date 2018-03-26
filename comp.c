@@ -61,9 +61,9 @@ void compile(Node* n) {
 	case IN: {
 		int off = n->n[0].i;
 		if (off != 0) {
-			iprintf("m[i+%d] = readChar(m[i+%d]);", off, off);
+			iprintf("readChar(&m[i+%d]);", off, off);
 		} else {
-			iprintf("m[i] = readChar(m[i]);");
+			iprintf("readChar(&m[i]);");
 		}
 	}
 	break;

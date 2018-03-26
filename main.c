@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
 			case 'E':
 				if (strcmp("unchanged", optarg) == 0 || strcmp("nc", optarg) == 0) {
 					eofType = EOF_NC;
-					eofStr = "prev";
+					eofStr = "*cell";
 				} else if (strcmp("-1", optarg) == 0) {
 					eofType = EOF_M1;
 					eofStr = "-1";
