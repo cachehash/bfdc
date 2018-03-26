@@ -57,9 +57,9 @@ void compileSpim(Node* n, int* labelId) {
 	break;
 	case SET: {
 		int off = n->n[0].i;
-		//if (n->sz > 2) {
+		if (n->sz > 1) {
 			iprintfln("lb $t3, %d($sp)", -off);
-		//}
+		}
 		for (int i = 1; i < n->sz; i++) {
 			Point *p = n->n[i].p;
 			int x = p->x;
