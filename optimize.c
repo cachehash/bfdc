@@ -262,6 +262,42 @@ int delayShift(Node** np) {
 	}
 	return changed | callAll(*pRef, delayShift);
 }
+int compNodes(const void* a, const void* b) {
+	const Node* na = *((Node**)a);
+	const Node* nb = *((Node**)b);
+	int ia = na->n[0].n->n[1].i;
+	int ib = nb->n[0].n->n[1].i;
+	return ia - ib;
+}
+int sort(Node** np) {
+	Node *n = *np;
+	if (n == NULL) {
+		return 0;
+	}
+	int changed = 0;
+	if (n->type == STMTS) {
+		Node** pRef = np;
+		Node** buff = NULL;
+		int nodes = 0;
+		while (n != NULL && n->n[0].n->type == SUM) {
+			nodes++;
+			buff = realloc(buff, nodes*sizeof(*buff));
+			buff[nodes-1] = n;
+			n = n->n[1].n;
+		}
+		if (nodes > 1) {
+			qsort(buff, nodes, sizeof(*buff), compNodes);
+			*np = buff[0];
+			for (int i = 1; i < nodes; i++) {
+				buff[i-1]->n[1].n = buff[i];
+			}
+			buff[nodes-1]->n[1].n = n;
+		}
+		free(buff);
+	}
+	changed |= callAll(n, join);
+	return changed;
+}
 void optimize(Node** n, int optLevel) {
 	if (optLevel <= 0) {
 		return;
@@ -281,6 +317,7 @@ void optimize(Node** n, int optLevel) {
 			}
 			if (optLevel >= 3) {
 				changed |= delayShift(n);
+				changed |= sort(n);
 			}
 		}
 	}
