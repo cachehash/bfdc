@@ -104,11 +104,11 @@ void compGo() {
 	iprintfln("x := C.getchar();");
 	iprintfln("if x == C.EOF {");
 	level++;
-	iprintfln("*cell = CELL_T(x)");
+	iprintfln("*cell = %s", eofStr);
 	level--;
 	iprintfln("} else {");
 	level++;
-	iprintfln("*cell = %s", eofStr);
+	iprintfln("*cell = CELL_T(x)");
 	level--;
 	iprintfln("}");
 	level--;
