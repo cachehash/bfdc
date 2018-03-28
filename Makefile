@@ -2,9 +2,8 @@
 .PHONY: clean all bfdc_fast debug
 
 objs=parse.tab.o lexer.o main.o optimize.o interp.o interp_raw.o dynarec.o comp.o comp_c.o comp_go.o comp_spim.o
-override CFLAGS := -Ofast -march=native $(CFLAGS)
-
-LDLIBS=-lhash -Lhash
+override CFLAGS := -O3 -march=native $(CFLAGS)
+override LDLIBS := -lm -lhash -Lhash $(LDLIBS)
 
 all: bfdc_fast
 
