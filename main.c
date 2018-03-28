@@ -26,17 +26,18 @@ extern void reg_segv();
 int usage(int);
 FILE* outfile;
 
-Node* root;
+Node* root = NULL;
 
 int numCells = NUM_CELLS;
 
 int eofType = EOF_M1;
 char* cell_t_str = NULL;
 
-char* progName;
+char* progName = NULL;
 
 size_t* I = 0;
 
+char* target = NULL;
 int main(int argc, char** argv) {
 	reg_segv();
 	progName = argv[0];
@@ -49,7 +50,7 @@ int main(int argc, char** argv) {
 	static struct option long_opts[] = {
 		{"jit",		no_argument,		0, 'j'},
 		{"dynarec",	no_argument,		0, 'd'},
-		{"traverse",	no_argument,		0, 't'},
+		{"traverse",	no_argument,		0, 'T'},
 		{"help",	no_argument,		0, 'h'},
 		{"interpret",	no_argument,		0, 'i'},
 		{"output",	required_argument,	0, 'o'},
@@ -57,16 +58,17 @@ int main(int argc, char** argv) {
 		{"eof",		required_argument,	0, 'E'},
 		{"cell-type",	required_argument,	0, 'C'},
 		{"optimize",	required_argument,	0, 'O'},
+		{"target",	required_argument,	0, 't'},
 		{0, 0, 0, 0}
 	};
-	while ((opt = getopt_long(argc, argv, "jdthio:c:C:E:O:", long_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "jdThio:c:C:E:O:t:", long_opts, NULL)) != -1) {
 		switch (opt) {
 			case 'j':
 			case 'd':
 				dynarec();
 				exit(0);
 			break;
-			case 't':
+			case 'T':
 				interpret = 2;
 			break;
 			case 'h':
@@ -99,6 +101,10 @@ int main(int argc, char** argv) {
 			break;
 			case 'O':
 				optLevel = atoi(optarg);
+			break;
+			case 't':
+				free(target);
+				target = strdup(optarg);
 			break;
 			default:
 				usage(INVALID_ARG);
@@ -155,13 +161,14 @@ int usage(int status) {
 	fprintf(f, "\
 \n\
    -i, --interpret              interpret the brainfuck code specified in FILE\n\
-   -t, --traverse               interpret the parse tree used for compilation instead of compiling\n\
+   -T, --traverse               interpret the parse tree used for compilation instead of compiling\n\
    -j, -d, --jit, --dynarec     use dynamic recompilation to run the program\n\
    -o, --output=FILE            output name for the compiled brainfuck\n\
    -O, --optimize=NUM           optimization level\n\
    -c, --num-cells=NUM          number of cells to use\n\
    -C, --cell-type=TYPE         data type to use for cells\n\
    -E, --eof=TYPE               format for EOF to use\n\
+   -t, --target=FORMAT		output language for compiled code\n\
    -h, --help                   display this help text\n\
 \n\
 Examples:\n\

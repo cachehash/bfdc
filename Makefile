@@ -14,9 +14,16 @@ debug:
 	make -j bfdc CFLAGS='-O0 -g'
 
 %.c: %.bf bfdc_fast
-	./bfdc $(BFFLAGS) $< -o $@
+	./bfdc $(BFFLAGS) -t c $< -o $@
 %.go: %.bf bfdc_fast
-	./bfdc $(BFFLAGS) $< -o $@
+	./bfdc $(BFFLAGS) -t go $< -o $@
+%.spim: %.bf bfdc_fast
+	./bfdc $(BFFLAGS) -t spim $< -o $@
+%.mips.s: %.bf bfdc_fast
+	./bfdc $(BFFLAGS) -t mips $< -o $@
+%.mips: %.mips.s
+	mips64-linux-gnuabi64-gcc $< -static -o $@
+	
 
 %.s: %.bf bfdc_fast
 	./bfdc $(BFFLAGS) $< -o $@
@@ -36,6 +43,6 @@ hash/libhash.a:
 
 clean::
 	for f in *.bf ; do rm -vf "$${f%.bf}" ; done
-	rm -vf bfdc parse.tab.c parse.tab.h lexer.c a.c a.out a *.o *.bf *.go *.s
+	rm -vf bfdc parse.tab.c parse.tab.h lexer.c a.c a.out a *.o *.bf *.go *.s *.spim *.mips
 	cd hash && make clean
 	cd vimbf && make clean

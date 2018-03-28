@@ -82,6 +82,9 @@ void compileSpim(Node* n, int* labelId) {
 			loada0(-off);
 			iprintfln("move $a1, $s4");
 			iprintfln("jalr $t9");
+			iprintfln("move $t9, $s5");
+			iprintfln("move $a0, $s4");
+			iprintfln("jalr $t9");
 			a0valid = 0;
 		}
 	}
@@ -149,7 +152,8 @@ void compileSpim(Node* n, int* labelId) {
 	break;
 	}
 }
-void compSpim() {
+static void _compMips() {
+	addiu = spim ? "addiu" : "daddiu";
 	if (spim) {
 		iprintfln(".text");
 		iprintfln("main:");
@@ -187,6 +191,8 @@ void compSpim() {
 		iprintfln("ld	$v0,%%got_disp(stdout)($gp)");
 		iprintfln("ld	$s3,%%call16(_IO_putc)($gp)");
 		iprintfln("ld	$s4,0($v0)");
+
+		iprintfln("ld	$s5,%%call16(fflush)($gp)");
 		iprintfln("daddiu $s0, $sp, -0x400");
 	}
 	int i = 0;
@@ -202,4 +208,13 @@ void compSpim() {
 		iprintfln("jr	$ra");
 		iprintfln(".end	main");
 	}
+}
+
+void compMips() {
+	spim = 0;
+	_compMips();
+}
+void compSpim() {
+	spim = 1;
+	_compMips();
 }

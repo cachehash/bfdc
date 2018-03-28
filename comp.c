@@ -51,14 +51,24 @@ void comp(char* outname) {
 		}
 	}
 	outname += i+1;
-	if (strcmp(outname, "c") == 0) {
-		compC();
-	} else if (strcmp(outname, "go") == 0) {
-		compGo();
-	} else if (strcmp(outname, "s") == 0) {
-		compSpim();
+	if (target == NULL) {
+		if (strcmp(outname, "go") == 0) {
+			compGo();
+		} else if (strcmp(outname, "s") == 0) {
+			//TODO target native assembly
+			compMips();
+		} else {
+			compC();
+		}
 	} else {
-		fprintf(stderr, "ERROR: `%s': unrecognized file type\n", outname);
-		exit(1);
+		if (strcmp(target, "c") == 0) {
+			compC();
+		} else if (strcmp(target, "go") == 0) {
+			compGo();
+		} else if (strcmp(target, "mips") == 0) {
+			compMips();
+		} else if (strcmp(target, "spim") == 0) {
+			compSpim();
+		}
 	}
 }
