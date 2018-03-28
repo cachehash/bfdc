@@ -11,10 +11,11 @@ static int a0 = 0;
 static int a0valid = 0;
 static void loada0(int off) {
 	if (!a0valid || a0 != off) {
-		//TODO offload store responsibility here?
 		a0 = off;
 		a0valid = 1;
 		iprintfln("lb $a0, %d($sp)", off);
+	} else {
+		//iprintfln("#lb $a0, %d($sp)", off);
 	}
 }
 //return -1 if not a power of 2, otherwise return lg(x)
@@ -125,6 +126,9 @@ void compileSpim(Node* n, int* labelId) {
 			iprintfln("sb $a0, %d($sp)", -x-off);
 		}
 		iprintfln("sb $0, %d($sp)", -off);
+		if (off == a0) {
+			a0valid = 0;
+		}
 	}
 	break;
 	}
