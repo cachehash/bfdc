@@ -7,15 +7,17 @@
 
 
 
+static int spim = 0;
+static char* addiu = "daddiu";
 static int a0 = 0;
 static int a0valid = 0;
 static void loada0(int off) {
 	if (!a0valid || a0 != off) {
 		a0 = off;
 		a0valid = 1;
-		iprintfln("lb $a0, %d($sp)", off);
+		iprintfln("lb $a0, %d($s0)", off);
 	} else {
-		//iprintfln("#lb $a0, %d($sp)", off);
+		//iprintfln("#lb $a0, %d($s0)", off);
 	}
 }
 //return -1 if not a power of 2, otherwise return lg(x)
@@ -58,29 +60,43 @@ void compileSpim(Node* n, int* labelId) {
 	case SUM: {
 		int off = n->n[1].i;
 		loada0(-off);
-		iprintfln("addiu $a0, $a0, %d", n->n[0].i);
-		iprintfln("sb $a0, %d($sp)", -off);
+		iprintfln("%s $a0, $a0, %d", addiu, n->n[0].i);
+		iprintfln("sb $a0, %d($s0)", -off);
 	}
 	break;
 	case SHIFT: {
 		int shamt = n->n[0].i;
-		iprintfln("addiu $sp, $sp, %d", -shamt);
+		iprintfln("%s $s0, $s0, %d", addiu, -shamt);
 		//move n to the right, a0 now holds m[i-n]
 		a0 += shamt;
 	}
 	break;
 	case OUT: {
 		int off = n->n[0].i;
-		iprintfln("li $v0, 11");
-		loada0(-off);
-		iprintfln("syscall");
+		if (spim) {
+			iprintfln("li $v0, 11");
+			loada0(-off);
+			iprintfln("syscall");
+		} else {
+			iprintfln("move $t9, $s3");
+			loada0(-off);
+			iprintfln("move $a1, $s4");
+			iprintfln("jalr $t9");
+			a0valid = 0;
+		}
 	}
 	break;
 	case IN: {
 		int off = n->n[0].i;
-		iprintfln("li $v0, 12");
-		iprintfln("syscall");
-		iprintfln("sb $v0, %d($sp)", -off);
+		if (spim) {
+			iprintfln("li $v0, 12");
+			iprintfln("syscall");
+		} else {
+			iprintfln("move $t9, $s1");
+			iprintfln("move $a0, $s2");
+			iprintfln("jalr $t9");
+		}
+		iprintfln("sb $v0, %d($s0)", -off);
 		//invalidate because we just updated memory, not a0 itself
 		//if (a0 == off)
 		a0valid = 0;
@@ -89,7 +105,7 @@ void compileSpim(Node* n, int* labelId) {
 	case SET: {
 		int off = n->n[0].i;
 		if (n->sz > 1) {
-			iprintfln("lb $t3, %d($sp)", -off);
+			iprintfln("lb $t3, %d($s0)", -off);
 		}
 		for (int i = 1; i < n->sz; i++) {
 			Point *p = n->n[i].p;
@@ -103,7 +119,7 @@ void compileSpim(Node* n, int* labelId) {
 			if (y != 1) {
 				int exp = getExp(y);
 				if (exp != -1) {
-					iprintfln("sll, $t1, $t3, %d", exp);
+					iprintfln("sll $t1, $t3, %d", exp);
 				} else {
 					iprintfln("li $t1, %d", y);
 					iprintfln("multu $t3, $t1");
@@ -114,7 +130,7 @@ void compileSpim(Node* n, int* labelId) {
 			if (scale != 1) {
 				int exp = getExp(scale);
 				if (exp != -1) {
-					iprintfln("srl, $t1, $t%d, %d", reg, exp);
+					iprintfln("srl $t1, $t%d, %d", reg, exp);
 				} else {
 					iprintfln("li $t2, %d", scale);
 					iprintfln("divu $t%d, $t2", reg);
@@ -123,9 +139,9 @@ void compileSpim(Node* n, int* labelId) {
 				reg = 1;
 			}
 			iprintfln("add $a0, $a0, $t%d", reg);
-			iprintfln("sb $a0, %d($sp)", -x-off);
+			iprintfln("sb $a0, %d($s0)", -x-off);
 		}
-		iprintfln("sb $0, %d($sp)", -off);
+		iprintfln("sb $0, %d($s0)", -off);
 		if (off == a0) {
 			a0valid = 0;
 		}
@@ -134,11 +150,56 @@ void compileSpim(Node* n, int* labelId) {
 	}
 }
 void compSpim() {
-	iprintfln(".text");
-	iprintfln("main:	addiu $sp, $sp, -1");
-	level++;
+	if (spim) {
+		iprintfln(".text");
+		iprintfln("main:");
+		iprintfln("addiu $s0, $sp, -0x400");
+		level++;
+	} else {
+		level++;
+		iprintfln(".section .mdebug.abi64");
+		iprintfln(".previous");
+		iprintfln(".module	fp=64");
+		iprintfln(".module	oddspreg");
+		iprintfln(".abicalls");
+		iprintfln(".text");
+		iprintfln(".section	.text.startup,\"ax\",@progbits");
+		iprintfln(".align	2");
+		iprintfln(".align	3");
+		iprintfln(".globl	main");
+		iprintfln(".set	nomips16");
+		iprintfln(".set	nomicromips");
+		iprintfln(".ent	main");
+		iprintfln(".type	main, @function");
+		level--;
+		iprintfln("main:");
+		level++;
+		iprintfln("daddiu	$sp,$sp,-16");
+		iprintfln("sd	$gp,0($sp)");
+		iprintfln("sd	$ra,8($sp)");
+		iprintfln("lui	$gp,%%hi(%%neg(%%gp_rel(main)))");
+		iprintfln("daddu	$gp,$gp,$t9");
+		iprintfln("daddiu	$gp,$gp,%%lo(%%neg(%%gp_rel(main)))");
+		iprintfln("ld	$v0,%%got_disp(stdin)($gp)");
+		iprintfln("ld	$s1,%%call16(_IO_getc)($gp)");
+		iprintfln("ld	$s2,0($v0)");
+
+		iprintfln("ld	$v0,%%got_disp(stdout)($gp)");
+		iprintfln("ld	$s3,%%call16(_IO_putc)($gp)");
+		iprintfln("ld	$s4,0($v0)");
+		iprintfln("daddiu $s0, $sp, -0x400");
+	}
 	int i = 0;
 	compileSpim(root, &i);
-	iprintfln("li $v0, 10");
-	iprintfln("syscall");
+	if (spim) {
+		iprintfln("li $v0, 10");
+		iprintfln("syscall");
+	} else {
+		iprintfln("ld	$ra,8($sp)");
+		iprintfln("ld	$gp,0($sp)");
+		iprintfln("move	$v0,$0");
+		iprintfln("daddiu	$sp,$sp,16");
+		iprintfln("jr	$ra");
+		iprintfln(".end	main");
+	}
 }

@@ -1,7 +1,7 @@
 .PRECIOUS: %.bf
 .PHONY: clean all bfdc_fast debug
 
-objs=parse.tab.o lexer.o main.o optimize.o interp.o interp_raw.o dynarec.o comp.o comp_c.o comp_go.o comp_spim.o
+objs=parse.tab.o lexer.o main.o optimize.o interp.o interp_raw.o dynarec.o comp.o comp_c.o comp_go.o comp_mips.o
 override CFLAGS := -O3 -march=native $(CFLAGS)
 override LDLIBS := -lm -lhash -Lhash $(LDLIBS)
 

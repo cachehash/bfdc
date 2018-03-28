@@ -1,7 +1,5 @@
-	.file	1 "char.c"
 	.section .mdebug.abi64
 	.previous
-	.nan	legacy
 	.module	fp=64
 	.module	oddspreg
 	.abicalls
@@ -45,9 +43,6 @@ putc:
 	.ent	main
 	.type	main, @function
 main:
-	.frame	$sp,16,$ra		# vars= 0, regs= 2/0, args= 0, gp= 0
-	.mask	0x90000000,-8
-	.fmask	0x00000000,0
 	daddiu	$sp,$sp,-16
 	sd	$gp,0($sp)
 	sd	$ra,8($sp)
@@ -63,5 +58,3 @@ main:
 	jr	$ra
 
 	.end	main
-	.size	main, .-main
-	.ident	"GCC: (Ubuntu 7.3.0-12ubuntu1) 7.3.0"
