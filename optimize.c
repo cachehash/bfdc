@@ -98,6 +98,30 @@ int nullify(Node** np) {
 	changed |= callAll(*np, nullify);
 	return changed;
 }
+/*
+ * This optimization should always run before the useSet and after nullify
+ * also maybe after useSet has been run this optimization should no longer be deployed
+ */
+int destroyLoops(Node** np) {
+	Node* n = *np;
+	if (n == NULL) {
+		return 0;
+	}
+	int changed  = 0;
+	if (n->type == STMTS) {
+		Node* left = n->n[0].n;
+		Node* right = n->n[1].n;
+		Node* rl = right ? right->n[0].n : NULL;
+		if (left->type == LOOP && rl && rl->type == LOOP) {
+			//delete right
+			n->n[1].n = right->n[1].n;
+			right->n[1].n = NULL;
+			clipBranch(&right);
+		}
+	}
+	changed |= callAll(*np, nullify);
+	return changed;
+}
 int useSet(Node** np) {
 	Node *n = *np;
 	if (n == NULL) {
@@ -106,8 +130,7 @@ int useSet(Node** np) {
 	int changed = 0;
 	if (n->type == LOOP) {
 		if (n->n[0].n == NULL) {
-			*np = NULL;
-			return 1;
+			return 0;
 		}
 		Node* body = n->n[0].n;
 		if (body->type != STMTS) {
@@ -302,15 +325,16 @@ void optimize(Node** n, int optLevel) {
 	if (optLevel <= 0) {
 		return;
 	}
-	int changed = 1;
 	/*
 	 * TODO a lot of the optimization functions are both iterative
 	 * and recursive O(n**2). Try to go through and make them O(n)
 	 */
+	int changed = 1;
 	while (changed) {
 		changed = 0;
 		changed |= join(n);
 		changed |= nullify(n);
+		changed |= destroyLoops(n);
 		if (!changed) {
 			if (optLevel >= 2) {
 				changed |= useSet(n);
