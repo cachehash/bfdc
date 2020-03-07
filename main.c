@@ -61,6 +61,18 @@ int main(int argc, char** argv) {
 		{"target",	required_argument,	0, 't'},
 		{0, 0, 0, 0}
 	};
+	//Allow for omission of '-' in shebangs
+	for (int x = 1; x < argc; x++) {
+		if (argv[x][0] == '=') {
+			argv[x][0] = '-';
+			if (argv[x][1] == '=') {
+				argv[x][0] = '-';
+			}
+		}
+		if (strcmp(argv[x], "--") == 0) {
+			break;
+		}
+	}
 	while ((opt = getopt_long(argc, argv, "jdThio:c:C:E:O:t:", long_opts, NULL)) != -1) {
 		switch (opt) {
 			case 'j':
