@@ -22,6 +22,7 @@
 extern int yyparse();
 extern FILE* yyin;
 extern void reg_segv();
+extern void runFast();
 
 int usage(int);
 FILE* outfile;
@@ -37,13 +38,19 @@ char* progName = NULL;
 
 size_t* I = 0;
 
+#define RUN_FAST 3
+#define RUN_INTERP_RAW 2
+#define RUN_INTERP 1
+
+char* ifile = NULL;
+
 char* target = NULL;
+
 int main(int argc, char** argv) {
 	reg_segv();
 	progName = argv[0];
 	int interpret = 0;
 	char* outname = NULL;
-	char* ifile = NULL;
 	char opt;
 	int optLevel = 3;
 	//TODO check if it's safe to not strdup optarg
@@ -53,6 +60,7 @@ int main(int argc, char** argv) {
 		{"traverse",	no_argument,		0, 'T'},
 		{"help",	no_argument,		0, 'h'},
 		{"interpret",	no_argument,		0, 'i'},
+		{"fast",	no_argument,		0, 'f'},
 		{"output",	required_argument,	0, 'o'},
 		{"num-cells",	required_argument,	0, 'c'},
 		{"eof",		required_argument,	0, 'E'},
@@ -73,7 +81,7 @@ int main(int argc, char** argv) {
 			break;
 		}
 	}
-	while ((opt = getopt_long(argc, argv, "jdThio:c:C:E:O:t:", long_opts, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "jdThifo:c:C:E:O:t:", long_opts, NULL)) != -1) {
 		switch (opt) {
 			case 'j':
 			case 'd':
@@ -81,13 +89,17 @@ int main(int argc, char** argv) {
 				exit(0);
 			break;
 			case 'T':
-				interpret = 2;
+				interpret = RUN_INTERP_RAW;
 			break;
 			case 'h':
 				usage(0);
 			break;
 			case 'i':
-				interpret = 1;
+				interpret = RUN_INTERP;
+			break;
+			case 'f':
+				interpret = RUN_FAST;
+				optLevel = 3;
 			break;
 			case 'o':
 				free(outname);
@@ -148,10 +160,16 @@ int main(int argc, char** argv) {
 	yyparse();
 	optimize(&root, optLevel);
 	if (interpret) {
-		if (interpret == 2) {
-			interpRaw();
-		} else {
-			interp();
+		switch (interpret) {
+			case RUN_INTERP:
+				interp();
+			break;
+			case RUN_INTERP_RAW:
+				interpRaw();
+			break;
+			case RUN_FAST:
+				runFast();
+			break;
 		}
 	} else {
 		if (outname == NULL) {
