@@ -17,11 +17,11 @@ inst_t;
 char* buff = NULL;
 
 static inst_t dummy;
-static const size_t TYPE_END = ((ptrdiff_t)&dummy.amt) - (ptrdiff_t)&dummy;
-static const size_t AMT_END = ((ptrdiff_t)&dummy.imm) - (ptrdiff_t)&dummy;
-static const size_t IMM_END = ((ptrdiff_t)&dummy.imm2) - (ptrdiff_t)&dummy;
-static const size_t IMM2_END = ((ptrdiff_t)&dummy.imm3) - (ptrdiff_t)&dummy;
-static const size_t IMM3_END = sizeof(dummy);
+#define TYPE_END (((ptrdiff_t)&dummy.amt) - (ptrdiff_t)&dummy)
+#define AMT_END (((ptrdiff_t)&dummy.imm) - (ptrdiff_t)&dummy)
+#define IMM_END (((ptrdiff_t)&dummy.imm2) - (ptrdiff_t)&dummy)
+#define IMM2_END (((ptrdiff_t)&dummy.imm3) - (ptrdiff_t)&dummy)
+#define IMM3_END (sizeof(dummy))
 
 int pc;
 static void grow(int amt) {
