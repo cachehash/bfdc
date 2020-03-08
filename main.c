@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
 		if (argv[x][0] == '=') {
 			argv[x][0] = '-';
 			if (argv[x][1] == '=') {
-				argv[x][0] = '-';
+				argv[x][1] = '-';
 			}
 		}
 		if (strcmp(argv[x], "--") == 0) {
