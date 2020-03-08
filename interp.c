@@ -3,12 +3,13 @@
 #include <string.h>
 #include "main.h"
 
+//#pragma pack(1)
 typedef struct inst_t {
 	uint8_t type;
-	int amt;
-	int imm;
-	int imm2;
-	int imm3;
+	int16_t amt;
+	int16_t imm;
+	int16_t imm2;
+	int16_t imm3;
 }
 #ifndef NO_PACK
 __attribute__((packed))
